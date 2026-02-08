@@ -1,5 +1,6 @@
 const { Hotel, Room } = require('../models');
 const { Op } = require('sequelize');
+const sse = require('../services/sse.service');
 
 exports.getBanners = async (req, res) => {
     try {
@@ -76,4 +77,8 @@ exports.getHotelDetail = async (req, res) => {
     } catch (e) {
         return res.status(500).json({ message: 'server error' });
     }
+};
+
+exports.streamPrices = (req, res) => {
+    sse.subscribe(res);
 };

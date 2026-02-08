@@ -1,5 +1,6 @@
 const { Hotel, Room } = require('../models');
 const { Op } = require('sequelize');
+const sse = require('../services/sse.service');
 
 function parseJsonField(val) {
     if (typeof val === 'string') {
@@ -38,6 +39,10 @@ exports.createHotel = async (req, res) => {
         }
 
         const withRooms = await Hotel.findByPk(hotel.id, { include: [{ model: Room, as: 'Rooms' }] });
+        const j = withRooms.toJSON();
+        const roomsList = (j.Rooms || []).map(r => ({ id: r.id, type_name: r.type_name, base_price: r.base_price }));
+        const minPrice = roomsList.length ? Math.min(...roomsList.map(r => r.base_price)) : null;
+        sse.broadcastPriceUpdate({ hotelId: hotel.id, roomsList, minPrice });
         return res.status(201).json(withRooms);
     } catch (e) {
         return res.status(500).json({ message: 'server error' });
@@ -100,6 +105,10 @@ exports.updateHotel = async (req, res) => {
         }
 
         const withRooms = await Hotel.findByPk(hotel.id, { include: [{ model: Room, as: 'Rooms' }] });
+        const j = withRooms.toJSON();
+        const roomList = (j.Rooms || []).map(r => ({ id: r.id, type_name: r.type_name, base_price: r.base_price }));
+        const minPrice = roomList.length ? Math.min(...roomList.map(r => r.base_price)) : null;
+        sse.broadcastPriceUpdate({ hotelId: hotel.id, rooms: roomList, minPrice });
         return res.json(withRooms);
     } catch (e) {
         return res.status(500).json({ message: 'server error' });
