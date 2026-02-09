@@ -1,0 +1,45 @@
+.drp {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.drp-dates {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background-color: #f6f7fb;
+}
+
+.drp-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.drp-label {
+  font-size: 10px;
+  color: #999;
+}
+
+.drp-value {
+  margin-top: 2px;
+  font-size: 13px;
+  color: #333;
+}
+
+.drp-divider {
+  width: 1px;
+  height: 24px;
+  margin: 0 8px;
+  background-color: #e3e5ee;
+}
+
+.drp-nights {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #999;
+}
+

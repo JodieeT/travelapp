@@ -1,0 +1,76 @@
+.room-card {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  margin: 8px 16px;
+  background-color: #ffffff;
+  border-radius: 10px;
+}
+
+.room-card__main {
+  flex: 1;
+  margin-right: 12px;
+}
+
+.room-card__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+}
+
+.room-card__sub {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.room-card__tags {
+  display: flex;
+  margin-top: 6px;
+}
+
+.room-card__tag {
+  font-size: 10px;
+  color: #3fbf6b;
+  background-color: #e8f8ef;
+  border-radius: 8px;
+  padding: 2px 6px;
+  margin-right: 4px;
+}
+
+.room-card__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.room-card__price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ff4d4f;
+}
+
+.room-card__price-desc {
+  font-size: 10px;
+  color: #999;
+}
+
+.room-card__total {
+  font-size: 11px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.room-card__btn {
+  margin-top: 8px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ff9f0a, #ff4d4f);
+}
+
+.room-card__btn Text {
+  font-size: 12px;
+  color: #fff;
+}
+

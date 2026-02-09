@@ -1,0 +1,94 @@
+.page-hotel-list {
+  min-height: 100vh;
+  background-color: #f5f6fa;
+}
+
+.list-header {
+  padding: 12px 16px 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+}
+
+.list-header__city {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.list-header__date {
+  font-size: 11px;
+  color: #999;
+}
+
+.list-header__keyword {
+  font-size: 12px;
+  color: #666;
+}
+
+.list-filter-bar {
+  padding: 8px 12px 6px;
+  background-color: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.list-filter-item {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.list-filter-item--active {
+  color: #ff7a00;
+}
+
+.list-filter-stars {
+  display: flex;
+  margin-bottom: 4px;
+}
+
+.list-filter-star {
+  font-size: 11px;
+  color: #666;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: #f5f5f5;
+  margin-right: 6px;
+}
+
+.list-filter-star--active {
+  background-color: #ffe9d6;
+  color: #ff7a00;
+}
+
+.list-filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.list-filter-tag {
+  font-size: 11px;
+  color: #666;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: #f5f5f5;
+  margin-right: 6px;
+  margin-top: 4px;
+}
+
+.list-filter-tag--active {
+  background-color: #ffe9d6;
+  color: #ff7a00;
+}
+
+.list-scroll {
+  height: calc(100vh - 96px);
+}
+
+.list-end {
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+}
+
