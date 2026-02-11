@@ -2,6 +2,7 @@ import {Link, useNavigate} from 'react-router-dom';
 import './Auth.css';
 import {useState} from "react";
 import {auth} from "../api/request.js";
+import {useAuth} from "../context/useAuth.jsx";
 
 export function Login() {
   const navigate = useNavigate()
@@ -9,13 +10,14 @@ export function Login() {
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const { login } = useAuth()
 
   async function handleSubmit(e) {
     e.preventDefault()
     setLoading(true)
     try {
       const {token, user} = await auth.login({username, password})
-      localStorage.setItem("token", token)
+      login(token, user)
       const role = user.role
       if (role === "merchant") {
         navigate("/merchant")

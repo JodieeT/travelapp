@@ -2,11 +2,11 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--bg-page, #f5f6f8);
+  background: #f5f6f8;
 }
 
 .pc-header {
-  background: var(--bg-header, #1a1f36);
+  background: #1a1f36;
   color: #e6e8ec;
   box-shadow: 0 1px 3px rgba(0,0,0,0.12);
 }
@@ -86,12 +86,12 @@
 }
 
 .pc-btn-primary {
-  background: var(--primary, #3182ce);
+  background: #3182ce;
   color: #fff;
 }
 
 .pc-btn-primary:hover {
-  background: var(--primary-hover, #2c5282);
+  background: #2c5282;
 }
 
 .pc-btn-ghost {
@@ -164,7 +164,7 @@
 .pc-form-group select:focus,
 .pc-form-group textarea:focus {
   outline: none;
-  border-color: var(--primary, #3182ce);
+  border-color: #3182ce;
   box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
 }
 

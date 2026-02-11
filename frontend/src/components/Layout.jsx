@@ -1,13 +1,20 @@
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
+import { useAuth } from '../context/useAuth.jsx';
 import './Layout.css';
 
 export function Layout({ children }) {
-  const { user } = useAuth();
-  const location = useLocation();
-  const isMerchant = user?.role === 'merchant';
-  const isAdmin = user?.role === 'admin';
+  const { user } = useAuth()
+  const location = useLocation()
+  const isMerchant = user?.role === 'merchant'
+  const isAdmin = user?.role === 'admin'
+  const { logout } = useAuth()
+  const navigate = useNavigate()
 
+  function handleLogout() {
+    logout()
+    navigate('/login')
+  }
+// 处理user role还没有加载出来的情况
   return (
     <div className="pc-layout">
       <header className="pc-header">
@@ -29,7 +36,7 @@ export function Layout({ children }) {
           <div className="pc-user">
             <span className="pc-role">{user?.role === 'merchant' ? '商户' : '管理员'}</span>
             <span className="pc-username">{user?.username}</span>
-            <button type="button" className="pc-btn pc-btn-ghost">退出</button>
+            <button type="button" className="pc-btn pc-btn-ghost" onClick={handleLogout}>退出</button>
           </div>
         </div>
       </header>

@@ -43,6 +43,6 @@
 }
 
 .auth-footer a {
-  color: var(--primary, #3182ce);
+  color: #3182ce;
   font-weight: 500;
 }
