@@ -1,14 +1,25 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import BottomBar from "@/components/BottomBar";
+import DateBanner from "@/components/DateBanner";
+import HotelInfoSection from "@/components/HotelInfoSelection";
+import ImageSwiper from "@/components/ImageSwiper";
+import RoomList from "@/components/RoomList";
+import TopNav from "@/components/TopNav";
+import { View, ScrollView } from "react-native";
 
-const HotelDetails = () => {
+export default function HotelDetail() {
   return (
-    <View>
-      <Text>HotelDetails
-    
-      </Text>
-    </View>
-  )
-}
+    <View className="flex-1 bg-gray-100">
+      
+      <TopNav />
 
-export default HotelDetails
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <ImageSwiper />
+        <HotelInfoSection />
+        <DateBanner />
+        <RoomList />
+      </ScrollView>
+
+      <BottomBar />
+    </View>
+  );
+}
