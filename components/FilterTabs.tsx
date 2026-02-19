@@ -1,8 +1,20 @@
+import { useState } from "react";
 import { View, Text } from "react-native";
+import TagSelector from "./TagSelector";
+
 
 export default function FilterTabs() {
   const tabs = ["推荐排序", "距离", "价格/星级", "筛选"];
-
+  const tags = ["免费停车", "亲子", "机场附近","宠物", "地铁附近", "景点附近"];
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);
+      // 切换标签选中状态
+    const toggleTag = (tag: string) => {
+      if (selectedTags.includes(tag)) {
+        setSelectedTags(selectedTags.filter(t => t !== tag));
+      } else {
+        setSelectedTags([...selectedTags, tag]);
+      }
+    };
   return (
     <View className=" bg-white py-3 border-t border-gray-100">
         <View className="flex-row justify-around bg-white py-3 border-t border-gray-100">
@@ -11,18 +23,8 @@ export default function FilterTabs() {
             {tab} ▾
             </Text>
         ))}
-        
         </View>
-      <View className="flex-row flex-wrap gap-2 mb-4">
-        {["免费停车", "亲子", "机场附近"].map((item, index) => (
-          <View
-            key={index}
-            className="px-3 py-1 bg-gray-100 rounded-full"
-          >
-            <Text className="text-sm">{item}</Text>
-          </View>
-        ))}
-      </View>
+        <TagSelector tags={tags} selectedTags={selectedTags} onToggleTag={toggleTag} />
     </View>
 
 
