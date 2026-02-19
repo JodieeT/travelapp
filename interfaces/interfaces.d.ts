@@ -1,4 +1,20 @@
+interface HotelBanner{
+  id: number;
+  name_cn: string;
+  name_en: string;
+  images: string[];
+  city: string;
+  star_level: number;
+}
 
+    // {
+    //     "id": 5,
+    //     "name_cn": "重庆香格里拉大酒店",
+    //     "name_en": "香格里拉大酒店 重庆",
+    //     "images": "[\"https://picsum.photos/800/400?random=4\",\"https://picsum.photos/800/400?random=104\",\"https://picsum.photos/800/400?random=204\"]",
+    //     "city": "重庆",
+    //     "star_level": 3
+    // }
 
 
 interface Movie {
