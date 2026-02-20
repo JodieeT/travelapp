@@ -14,9 +14,14 @@ export default function Index() {
   console.log(bannerHotels)
   return (
     <View className="flex-1 bg-white">
-      <View className="mt-2">
-          <Banner hotels={bannerHotels} />
-          <SearchCard />
+      {/* Banner区域 - 确保位于最上方，占据全宽 */}
+      <View className="w-full mt-0 pt-0">
+        <Banner hotels={bannerHotels ?? undefined} />
+      </View>
+      
+      {/* SearchCard区域 - 在下方，与Banner产生自然重叠 */}
+      <View className="relative -mt-16 z-10 mx-4">
+        <SearchCard />
       </View>
     </View>
   );

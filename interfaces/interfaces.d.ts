@@ -7,90 +7,93 @@ interface HotelBanner{
   star_level: number;
 }
 
-    // {
-    //     "id": 5,
-    //     "name_cn": "重庆香格里拉大酒店",
-    //     "name_en": "香格里拉大酒店 重庆",
-    //     "images": "[\"https://picsum.photos/800/400?random=4\",\"https://picsum.photos/800/400?random=104\",\"https://picsum.photos/800/400?random=204\"]",
-    //     "city": "重庆",
-    //     "star_level": 3
-    // }
-
-
-interface Movie {
+// 酒店房间信息接口
+interface Room {
   id: number;
-  title: string;
-  adult: boolean;
-  backdrop_path: string;
-  genre_ids: number[];
-  original_language: string;
-  original_title: string;
-  overview: string;
-  popularity: number;
-  poster_path: string;
-  release_date: string;
-  video: boolean;
-  vote_average: number;
-  vote_count: number;
+  type_name: string;
+  base_price: number;
 }
 
-interface TrendingMovie {
-  searchTerm: string;
-  movie_id: number;
-  title: string;
-  count: number;
-  poster_url: string;
-}
-
-interface MovieDetails {
-  adult: boolean;
-  backdrop_path: string | null;
-  belongs_to_collection: {
-    id: number;
-    name: string;
-    poster_path: string;
-    backdrop_path: string;
-  } | null;
-  budget: number;
-  genres: {
-    id: number;
-    name: string;
-  }[];
-  homepage: string | null;
+// 酒店展示信息接口
+interface Hotel{
   id: number;
-  imdb_id: string | null;
-  original_language: string;
-  original_title: string;
-  overview: string | null;
-  popularity: number;
-  poster_path: string | null;
-  production_companies: {
-    id: number;
-    logo_path: string | null;
-    name: string;
-    origin_country: string;
-  }[];
-  production_countries: {
-    iso_3166_1: string;
-    name: string;
-  }[];
-  release_date: string;
-  revenue: number;
-  runtime: number | null;
-  spoken_languages: {
-    english_name: string;
-    iso_639_1: string;
-    name: string;
-  }[];
-  status: string;
-  tagline: string | null;
-  title: string;
-  video: boolean;
-  vote_average: number;
-  vote_count: number;
+  name_cn: string;
+  name_en: string;
+  city: string;
+  address: string;
+  star_level: number;
+  open_date: string;
+  images: string[];
+  tags: string[];
+  facilities: string[];
+  min_price: number;
 }
 
-interface TrendingCardProps {
-  movie: TrendingMovie;
-  index: number;
+// 酒店列表响应接口
+interface HotelListResponse {
+  total: number;
+  list: Hotel[];
 }
+
+interface HotelDetail {
+  id: number;
+  name_cn: string;
+  name_en: string;
+  city: string;
+  address: string;
+  star_level: number;
+  open_date: string;
+  images: string[];
+  tags: string[];
+  facilities: string[];
+  rooms: Room[];
+  min_price: number;
+}
+
+        // {
+        //     "id": 19,
+        //     "merchant_id": 3,
+        //     "name_cn": "上海华美达酒店",
+        //     "name_en": "华美达酒店 上海",
+        //     "city": "上海",
+        //     "address": "上海市中心商业区69号",
+        //     "star_level": 2,
+        //     "open_date": "2023-02-10",
+        //     "status": "approved",
+        //     "reject_reason": null,
+        //     "images": "[\"https://picsum.photos/800/400?random=18\",\"https://picsum.photos/800/400?random=118\",\"https://picsum.photos/800/400?random=218\"]",
+        //     "tags": "\"会议\"",
+        //     "facilities": "[\"免费WiFi\",\"停车场\",\"健身房\",\"游泳池\",\"餐厅\"]",
+        //     "is_banner": false,
+        //     "banner_sort": 0,
+        //     "createdAt": "2026-02-19T15:02:03.752Z",
+        //     "updatedAt": "2026-02-19T15:02:03.752Z",
+        //     "Rooms": [
+        //         {
+        //             "id": 68,
+        //             "type_name": "行政套房",
+        //             "base_price": 816
+        //         },
+        //         {
+        //             "id": 65,
+        //             "type_name": "标准双床房",
+        //             "base_price": 842
+        //         },
+        //         {
+        //             "id": 64,
+        //             "type_name": "标准大床房",
+        //             "base_price": 847
+        //         },
+        //         {
+        //             "id": 67,
+        //             "type_name": "豪华套房",
+        //             "base_price": 864
+        //         },
+        //         {
+        //             "id": 66,
+        //             "type_name": "豪华大床房",
+        //             "base_price": 1021
+        //         }
+        //     ],
+        //     "minPrice": 816
+        // }
