@@ -68,9 +68,9 @@ export function HotelList() {
                         <td>{hotel.city}</td>
                         <td>{hotel.star_level}</td>
                         <td>
-                          {hotel.Rooms.map((r) =>
-                          <div>{r.type_name} {r.base_price}</div>
-                          )}
+                          {(hotel.Rooms || []).map((r, i) => (
+                            <span key={r.id ?? `room-${i}`} style={{ display: 'block' }}>{r.type_name} ￥{r.base_price}</span>
+                          ))}
                         </td>
                         <td>
                           <span className={`pc-status ${STATUS_MAP[hotel.status].className}`}>{STATUS_MAP[hotel.status].label}</span>

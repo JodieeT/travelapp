@@ -12,7 +12,7 @@ function parseJsonField(val) {
 exports.createHotel = async (req, res) => {
     try {
         const merchantId = req.user.id;
-        const { name_cn, name_en, city, address, star_level, open_date, images, tags, facilities, is_banner, banner_sort, rooms } = req.body || {};
+        const { name_cn, name_en, city, address, star_level, open_date, images, tags, facilities, rooms } = req.body || {};
         if (!name_cn || !address) return res.status(400).json({ message: 'name_cn and address required' });
 
         const hotel = await Hotel.create({
@@ -26,8 +26,8 @@ exports.createHotel = async (req, res) => {
             images: JSON.stringify(parseJsonField(images)),
             tags: JSON.stringify(parseJsonField(tags)),
             facilities: JSON.stringify(parseJsonField(facilities)),
-            is_banner: !!is_banner,
-            banner_sort: banner_sort != null ? Number(banner_sort) : 0,
+            is_banner: false,
+            banner_sort: 0,
             status: 'draft'
         });
 
@@ -81,7 +81,7 @@ exports.updateHotel = async (req, res) => {
         if (!hotel) return res.status(404).json({ message: 'hotel not found' });
         if (hotel.status !== 'draft' && hotel.status !== 'rejected') return res.status(400).json({ message: 'only draft or rejected hotel can be edited' });
 
-        const { name_cn, name_en, city, address, star_level, open_date, images, tags, facilities, is_banner, banner_sort, rooms } = req.body || {};
+        const { name_cn, name_en, city, address, star_level, open_date, images, tags, facilities, rooms } = req.body || {};
         if (name_cn != null) hotel.name_cn = name_cn;
         if (name_en != null) hotel.name_en = name_en;
         if (city != null) hotel.city = city;
@@ -91,8 +91,6 @@ exports.updateHotel = async (req, res) => {
         if (images !== undefined) hotel.images = JSON.stringify(parseJsonField(images));
         if (tags !== undefined) hotel.tags = JSON.stringify(parseJsonField(tags));
         if (facilities !== undefined) hotel.facilities = JSON.stringify(parseJsonField(facilities));
-        if (is_banner !== undefined) hotel.is_banner = !!is_banner;
-        if (banner_sort !== undefined) hotel.banner_sort = Number(banner_sort);
         await hotel.save();
 
         if (Array.isArray(rooms)) {

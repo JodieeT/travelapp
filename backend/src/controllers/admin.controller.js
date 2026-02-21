@@ -21,6 +21,19 @@ exports.getHotels = async (req, res) => {
     }
 };
 
+exports.getHotelById = async (req, res) => {
+    try {
+        const hotel = await Hotel.findOne({
+            where: { id: req.params.id },
+            include: [{ model: Room, as: 'Rooms' }]
+        });
+        if (!hotel) return res.status(404).json({ message: 'hotel not found' });
+        return res.json(hotel);
+    } catch (e) {
+        return res.status(500).json({ message: 'server error' });
+    }
+};
+
 exports.approveHotel = async (req, res) => {
     try {
         const hotel = await Hotel.findByPk(req.params.id);
@@ -76,6 +89,23 @@ exports.restoreHotel = async (req, res) => {
         if (hotel.status !== 'offline') return res.status(400).json({ message: 'only offline hotel can be restored' });
 
         hotel.status = 'approved';
+        await hotel.save();
+        const withRooms = await Hotel.findByPk(hotel.id, { include: [{ model: Room, as: 'Rooms' }] });
+        return res.json(withRooms);
+    } catch (e) {
+        return res.status(500).json({ message: 'server error' });
+    }
+};
+
+exports.setBanner = async (req, res) => {
+    try {
+        const hotel = await Hotel.findByPk(req.params.id);
+        if (!hotel) return res.status(404).json({ message: 'hotel not found' });
+        if (hotel.status !== 'approved') return res.status(400).json({ message: 'only approved hotel can be set as banner' });
+
+        const { is_banner, banner_sort } = req.body || {};
+        hotel.is_banner = is_banner !== undefined ? !!is_banner : hotel.is_banner;
+        hotel.banner_sort = banner_sort !== undefined ? Number(banner_sort) : hotel.banner_sort;
         await hotel.save();
         const withRooms = await Hotel.findByPk(hotel.id, { include: [{ model: Room, as: 'Rooms' }] });
         return res.json(withRooms);

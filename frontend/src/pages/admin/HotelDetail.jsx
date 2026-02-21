@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { Layout } from '../../components/Layout';
 import { useEffect, useState } from 'react';
-import { merchant } from '../../api/request.js';
+import { admin } from '../../api/request.js';
 
 function parseJsonField(val) {
   if (val == null) return [];
@@ -36,7 +36,7 @@ export function HotelDetail() {
   const [hotel, setHotel] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [acting, setActing] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -48,7 +48,7 @@ export function HotelDetail() {
     setError('');
     setHotel(null);
     let cancelled = false;
-    merchant
+    admin
       .getHotel(id)
       .then((data) => {
         if (!cancelled && data) setHotel(data);
@@ -62,14 +62,45 @@ export function HotelDetail() {
     return () => { cancelled = true; };
   }, [id]);
 
-  function handleSubmit() {
-    setIsSubmitting(true);
-    merchant
-      .submitHotel(id)
+  const handleApprove = () => {
+    if (!window.confirm('确定通过该酒店的审核？')) return;
+    setActing(true);
+    admin
+      .approveHotel(id)
       .then((data) => setHotel(data))
-      .catch((e) => setError(e.message))
-      .finally(() => setIsSubmitting(false));
-  }
+      .catch((e) => alert(e.message || '操作失败'))
+      .finally(() => setActing(false));
+  };
+
+  const handleReject = () => {
+    const reason = window.prompt('请输入驳回原因：');
+    if (reason === null) return;
+    setActing(true);
+    admin
+      .rejectHotel(id, reason)
+      .then((data) => setHotel(data))
+      .catch((e) => alert(e.message || '操作失败'))
+      .finally(() => setActing(false));
+  };
+
+  const handleOffline = () => {
+    if (!window.confirm('确定下线该酒店？下线后可恢复。')) return;
+    setActing(true);
+    admin
+      .offlineHotel(id)
+      .then((data) => setHotel(data))
+      .catch((e) => alert(e.message || '操作失败'))
+      .finally(() => setActing(false));
+  };
+
+  const handleRestore = () => {
+    setActing(true);
+    admin
+      .restoreHotel(id)
+      .then((data) => setHotel(data))
+      .catch((e) => alert(e.message || '操作失败'))
+      .finally(() => setActing(false));
+  };
 
   if (loading) {
     return (
@@ -88,7 +119,7 @@ export function HotelDetail() {
         <div className="pc-card">
           <p className="pc-error">{error || '酒店不存在'}</p>
           <p style={{ marginTop: 8, color: '#718096', fontSize: 14 }}>请检查链接或返回列表</p>
-          <Link to="/merchant" className="pc-btn pc-btn-ghost" style={{ marginTop: 16, display: 'inline-block' }}>
+          <Link to="/admin" className="pc-btn pc-btn-ghost" style={{ marginTop: 16, display: 'inline-block' }}>
             返回列表
           </Link>
         </div>
@@ -96,7 +127,6 @@ export function HotelDetail() {
     );
   }
 
-  const canEdit = hotel.status === 'draft' || hotel.status === 'rejected';
   const statusInfo = STATUS_MAP[hotel.status] || { label: hotel.status, className: '' };
   const roomsRaw = hotel.Rooms ?? hotel.rooms ?? [];
   const rooms = (Array.isArray(roomsRaw) ? roomsRaw : [])
@@ -112,22 +142,47 @@ export function HotelDetail() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <span className={`pc-status ${statusInfo.className}`}>{statusInfo.label}</span>
           <div className="pc-actions">
-            <Link to="/merchant" className="pc-btn pc-btn-ghost pc-btn-sm">
+            <Link to="/admin" className="pc-btn pc-btn-ghost pc-btn-sm">
               返回列表
             </Link>
-            {canEdit && (
-              <Link to={`/merchant/hotels/${hotel.id}/edit`} className="pc-btn pc-btn-primary pc-btn-sm">
-                编辑
-              </Link>
+            {hotel.status === 'pending' && (
+              <>
+                <button
+                  type="button"
+                  className="pc-btn pc-btn-success pc-btn-sm"
+                  onClick={handleApprove}
+                  disabled={acting}
+                >
+                  {acting ? '...' : '通过'}
+                </button>
+                <button
+                  type="button"
+                  className="pc-btn pc-btn-danger pc-btn-sm"
+                  onClick={handleReject}
+                  disabled={acting}
+                >
+                  {acting ? '...' : '驳回'}
+                </button>
+              </>
             )}
-            {canEdit && (
+            {hotel.status === 'approved' && (
               <button
                 type="button"
-                className="pc-btn pc-btn-success pc-btn-sm"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
+                className="pc-btn pc-btn-ghost pc-btn-sm"
+                onClick={handleOffline}
+                disabled={acting}
               >
-                {isSubmitting ? '提交中...' : '提交审核'}
+                {acting ? '...' : '下线'}
+              </button>
+            )}
+            {hotel.status === 'offline' && (
+              <button
+                type="button"
+                className="pc-btn pc-btn-primary pc-btn-sm"
+                onClick={handleRestore}
+                disabled={acting}
+              >
+                {acting ? '...' : '恢复'}
               </button>
             )}
           </div>
