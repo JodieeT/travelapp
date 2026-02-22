@@ -48,11 +48,30 @@ npm run dev
 
 ### 主要接口一览
 
-**公开（用户端）**
+**公开（用户端 / 移动端）**
 
 - `GET /api/banners` — 首页 Banner 列表
-- `GET /api/hotels?city=&keyword=&star_level=&minPrice=&maxPrice=&page=&limit=` — 酒店列表（分页、筛选）
-- `GET /api/hotels/:id` — 酒店详情（含房型，按价格排序）
+- `GET /api/cities` — 获取所有可用城市列表（用于下拉选择）
+- `GET /api/tags` — 获取所有可用标签列表（用于快捷标签）
+- `GET /api/hotels` — 酒店列表（分页、筛选）
+  - 查询参数：
+    - `city` — 城市名称（模糊匹配）
+    - `keyword` — 关键字搜索（匹配酒店名、英文名、地址）
+    - `star_level` — 星级（3/4/5）
+    - `minPrice` / `maxPrice` — 价格区间
+    - `tags` — 标签筛选（单个：`"亲子"`，多个：`"亲子,豪华"`）
+    - `page` — 页码（默认1）
+    - `limit` — 每页数量（默认20，最大100）
+  - 响应：`{ total: 总数, list: [酒店数组] }`
+  - 说明：`images`、`tags`、`facilities` 字段自动解析为数组
+- `GET /api/hotels/:id` — 酒店详情
+  - 查询参数（可选）：
+    - `check_in` — 入住日期（格式：`YYYY-MM-DD`，如 `2025-03-01`）
+    - `check_out` — 离店日期（格式：`YYYY-MM-DD`，如 `2025-03-05`）
+    - `nights` — 间夜数（如果提供，会计算每个房型的总价）
+  - 响应：酒店详细信息，包含房型列表（按价格从低到高排序）
+  - 说明：如果提供了日期参数，每个房型会包含 `total_price`（总价 = `base_price * nights`）
+- `GET /api/prices/stream` — 价格实时更新流（SSE）
 
 **认证**
 
@@ -81,7 +100,8 @@ npm run dev
 
 ```bash
 cd backend
-npm run test:api
+npm run test:api      # 管理端接口（登录、商户、管理员）
+npm run test:mobile   # 移动端接口（banners、cities、tags、hotels 列表/详情）
 ```
 
 会依次请求上述主要接口并打印结果，用于快速验证。

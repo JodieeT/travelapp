@@ -17,7 +17,7 @@ exports.getBanners = async (req, res) => {
 
 exports.listHotels = async (req, res) => {
     try {
-        const { city, keyword, star_level, minPrice, maxPrice, page = 1, limit = 20 } = req.query;
+        const { city, keyword, star_level, minPrice, maxPrice, tags, page = 1, limit = 20 } = req.query;
         const where = { status: 'approved' };
         if (city) where.city = { [Op.like]: `%${city}%` };
         if (star_level != null && star_level !== '') where.star_level = Number(star_level);
@@ -27,6 +27,18 @@ exports.listHotels = async (req, res) => {
                 { name_en: { [Op.like]: `%${keyword}%` } },
                 { address: { [Op.like]: `%${keyword}%` } }
             ];
+        }
+
+        // 标签筛选：支持单个标签或多个标签（逗号分隔）
+        if (tags) {
+            const tagList = typeof tags === 'string' ? tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+            if (tagList.length > 0) {
+                const tagConditions = tagList.map(tag => ({
+                    tags: { [Op.like]: `%${tag}%` }
+                }));
+                where[Op.and] = where[Op.and] || [];
+                where[Op.and].push({ [Op.or]: tagConditions });
+            }
         }
 
         const offset = Math.max(0, (Number(page) - 1) * Math.min(Number(limit) || 20, 100));
@@ -54,6 +66,16 @@ exports.listHotels = async (req, res) => {
 
         const list = rows.map(h => {
             const j = h.toJSON();
+            // 解析JSON字段
+            try {
+                j.images = typeof j.images === 'string' ? JSON.parse(j.images) : (j.images || []);
+                j.tags = typeof j.tags === 'string' ? JSON.parse(j.tags) : (j.tags || []);
+                j.facilities = typeof j.facilities === 'string' ? JSON.parse(j.facilities) : (j.facilities || []);
+            } catch (e) {
+                j.images = [];
+                j.tags = [];
+                j.facilities = [];
+            }
             const rooms = (j.Rooms || []).sort((a, b) => (a.base_price || 0) - (b.base_price || 0));
             const minPriceVal = rooms.length ? Math.min(...rooms.map(r => r.base_price)) : null;
             return { ...j, Rooms: rooms, minPrice: minPriceVal };
@@ -81,4 +103,45 @@ exports.getHotelDetail = async (req, res) => {
 
 exports.streamPrices = (req, res) => {
     sse.subscribe(res);
+};
+
+exports.getCities = async (req, res) => {
+    try {
+        const hotels = await Hotel.findAll({
+            where: { status: 'approved' },
+            attributes: ['city'],
+            raw: true
+        });
+        const cities = [...new Set(hotels.map(h => h.city).filter(Boolean))].sort();
+        return res.json(cities);
+    } catch (e) {
+        return res.status(500).json({ message: 'server error' });
+    }
+};
+
+exports.getTags = async (req, res) => {
+    try {
+        const hotels = await Hotel.findAll({
+            where: { status: 'approved' },
+            attributes: ['tags'],
+            raw: true
+        });
+        const allTags = new Set();
+        hotels.forEach(h => {
+            try {
+                const tags = typeof h.tags === 'string' ? JSON.parse(h.tags) : (h.tags || []);
+                if (Array.isArray(tags)) {
+                    tags.forEach(tag => {
+                        if (tag && typeof tag === 'string') allTags.add(tag.trim());
+                    });
+                }
+            } catch (err) {
+                // ignore
+            }
+        });
+        const tagsList = Array.from(allTags).sort();
+        return res.json(tagsList);
+    } catch (e) {
+        return res.status(500).json({ message: 'server error' });
+    }
 };
