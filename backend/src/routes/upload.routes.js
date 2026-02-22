@@ -6,7 +6,7 @@ const auth = require('../middlewares/auth');
 const role = require('../middlewares/role');
 
 const router = express.Router();
-const UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads');
+const UPLOAD_DIR = path.join(__dirname, '..', '..', 'img');
 
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -34,7 +34,7 @@ const upload = multer({
 
 router.post('/image', auth, role('merchant'), upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ message: '请选择图片文件' });
-  const url = '/uploads/' + req.file.filename;
+  const url = '/img/' + req.file.filename;
   return res.json({ url });
 });
 
@@ -49,7 +49,7 @@ router.post('/images', auth, role('merchant'), (req, res, next) => {
   });
 }, (req, res) => {
   if (!req.files || req.files.length === 0) return res.status(400).json({ message: '请选择图片文件' });
-  const urls = req.files.map((f) => '/uploads/' + f.filename);
+  const urls = req.files.map((f) => '/img/' + f.filename);
   return res.json({ urls });
 });
 

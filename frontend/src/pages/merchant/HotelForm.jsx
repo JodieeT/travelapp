@@ -164,18 +164,19 @@ export function HotelForm() {
               />
             </div>
             <div className="pc-form-group">
-              <label>酒店英文名</label>
+              <label>酒店英文名 *</label>
               <input
                 placeholder="Hotel Name"
                 value={name_en}
                 onChange={(e) => setName_en(e.target.value)}
+                required={true}
               />
             </div>
           </div>
           <div className="pc-form-row">
             <div className="pc-form-group">
-              <label>城市</label>
-              <input placeholder="如：北京" value={city} onChange={(e) => setCity(e.target.value)} />
+              <label>城市 *</label>
+              <input placeholder="如：北京" value={city} onChange={(e) => setCity(e.target.value)} required={true} />
             </div>
             <div className="pc-form-group">
               <label>地址 *</label>
@@ -184,8 +185,8 @@ export function HotelForm() {
           </div>
           <div className="pc-form-row">
             <div className="pc-form-group">
-              <label>星级</label>
-              <select value={star_level} onChange={(e) => setStar_level(e.target.value)}>
+              <label>星级 *</label>
+              <select value={star_level} onChange={(e) => setStar_level(e.target.value)} required={true}>
                 <option value="">请选择</option>
                 {STAR_OPTIONS.map((s) => (
                   <option key={s} value={s}>
@@ -195,8 +196,8 @@ export function HotelForm() {
               </select>
             </div>
             <div className="pc-form-group">
-              <label>开业日期</label>
-              <input type="date" value={open_date} onChange={(e) => setOpen_date(e.target.value)} />
+              <label>开业日期 *</label>
+              <input type="date" value={open_date} onChange={(e) => setOpen_date(e.target.value)} required={true} max="2026-02-21" />
             </div>
           </div>
 
@@ -220,29 +221,6 @@ export function HotelForm() {
             </button>
             <span style={{ color: '#718096', fontSize: 13 }}>支持 JPEG/PNG/GIF/WebP，单张不超过 5MB</span>
           </div>
-          <p style={{ marginTop: 4, marginBottom: 12, fontSize: 13, color: '#718096' }}>或填写图片 URL：</p>
-          {images.map((url, index) => (
-            <div key={index} className="pc-form-group" style={{ display: 'flex', gap: 8 }}>
-              <input
-                placeholder="https://... 或 /uploads/xxx"
-                style={{ flex: 1 }}
-                value={url}
-                onChange={(e) =>
-                  setImages((prev) => prev.map((u, i) => (i === index ? e.target.value : u)))
-                }
-              />
-              <button
-                type="button"
-                className="pc-btn pc-btn-ghost pc-btn-sm"
-                onClick={() => removeRow(setImages, index)}
-              >
-                删除
-              </button>
-            </div>
-          ))}
-          <button type="button" className="pc-btn pc-btn-ghost pc-btn-sm" onClick={() => addRow(setImages, '')}>
-            + 添加图片 URL
-          </button>
 
           <h2 style={{ marginTop: 24 }}>标签</h2>
           {tags.map((tag, index) => (

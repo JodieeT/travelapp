@@ -14,6 +14,14 @@ export function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault()
+    if (!username.trim()) {
+      setError("请输入用户名")
+      return
+    }
+    if (!password) {
+      setError("请输入密码")
+      return
+    }
     setLoading(true)
     try {
       const {token, user} = await auth.login({username, password})
@@ -70,10 +78,13 @@ export function Login() {
           >
             {loading ? "登录中" : "登录"}
           </button>
+          <p className="auth-footer">
+            还没有账号？ <Link to="/register">注册</Link>
+          </p>
+          <p className="auth-footer">
+            忘记密码？ <a href="javascript:void(0)" onClick={() => alert("请联系客服找回密码")}>联系客服</a>
+          </p>
         </form>
-        <p className="auth-footer">
-          还没有账号？ <Link to="/register">注册</Link>
-        </p>
       </div>
     </div>
   );

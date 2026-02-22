@@ -1,0 +1,26 @@
+[
+  {
+    "merchant_id": 1,
+    "name_cn": "北京王府井希尔顿酒店",
+    "name_en": "Hilton Beijing Wangfujing",
+    "city": "北京",
+    "address": "王府井东街8号",
+    "star_level": 5,
+    "open_date": "2008-06-01",
+    "tags": ["豪华", "市中心"],
+    "facilities": ["WiFi", "健身房", "游泳池", "停车场"],
+    "imageFiles": ["hotel1.jpg", "hotel2.jpg"]
+  },
+  {
+    "merchant_id": 1,
+    "name_cn": "上海外滩酒店",
+    name_en": "The Bund Hotel",
+    "city": "上海",
+    "address": "中山东一路100号",
+    "star_level": 5,
+    "open_date": "2015-03-15",
+    "tags": ["江景", "奢华"],
+    "facilities": ["WiFi", "健身房", "餐厅"],
+    "imageFiles": ["hotel3.jpg"]
+  }
+]
