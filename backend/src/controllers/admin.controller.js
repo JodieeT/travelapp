@@ -13,6 +13,7 @@ exports.getHotels = async (req, res) => {
             order: [['id', 'DESC']],
             offset,
             limit: limitNum,
+            distinct: true,
             include: [{ model: Room, as: 'Rooms' }]
         });
         return res.json({ total: count, list: rows });

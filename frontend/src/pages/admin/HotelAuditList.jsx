@@ -143,7 +143,7 @@ export function HotelAuditList() {
                   <th>星级</th>
                   <th>房型/价格</th>
                   <th>状态</th>
-                  <th>驳回原因</th>
+                  <th>Banner</th>
                   <th>操作</th>
                 </tr>
               </thead>
@@ -173,12 +173,7 @@ export function HotelAuditList() {
                         <td>
                           <span className={`pc-status ${statusInfo.className}`}>{statusInfo.label}</span>
                         </td>
-                        <td>
-                          {h.status === 'approved' ? (h.is_banner ? `是（排序 ${h.banner_sort ?? 0}）` : '否') : '-'}
-                        </td>
-                        <td style={{ maxWidth: 160, wordBreak: 'break-all' }}>
-                          {h.reject_reason || '-'}
-                        </td>
+                        <td>{h.status === 'approved' ? (h.is_banner ? `是（排序 ${h.banner_sort ?? 0}）` : '否') : '-'}</td>
                         <td>
                           <div className="pc-actions">
                             <Link to={`/admin/hotels/${h.id}`} className="pc-btn pc-btn-ghost pc-btn-sm">
