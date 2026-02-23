@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '../../components/Layout';
 import { merchant, uploadImages } from '../../api/request';
+import { useAutoSave } from '../../hooks/useAutoSave';
 
 function parseJsonField(val) {
   if (val == null) return [];
@@ -26,6 +27,7 @@ export function HotelForm() {
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [draftRestored, setDraftRestored] = useState(false);
 
   const [name_cn, setName_cn] = useState('');
   const [name_en, setName_en] = useState('');
@@ -37,8 +39,13 @@ export function HotelForm() {
   const [uploading, setUploading] = useState(false);
   const [tags, setTags] = useState(['']);
   const [facilities, setFacilities] = useState(['']);
+  const [nearby_traffic, setNearby_traffic] = useState(['']);
+  const [nearby_attractions, setNearby_attractions] = useState(['']);
   const [rooms, setRooms] = useState([{ type_name: '', base_price: '' }]);
   const fileInputRef = useRef(null);
+
+  const formData = { name_cn, name_en, city, address, star_level, open_date, images, tags, facilities, nearby_traffic, nearby_attractions, rooms };
+  const { save, clear, load } = useAutoSave(formData, !isEdit && !loading);
 
   useEffect(() => {
     if (!id) return;
@@ -59,6 +66,10 @@ export function HotelForm() {
         setTags(t.length ? t : ['']);
         const f = parseJsonField(data.facilities);
         setFacilities(f.length ? f : ['']);
+        const nt = parseJsonField(data.nearby_traffic);
+        setNearby_traffic(nt.length ? nt : ['']);
+        const na = parseJsonField(data.nearby_attractions);
+        setNearby_attractions(na.length ? na : ['']);
         const r = (data.Rooms || []).map((x) => ({
           type_name: x.type_name || '',
           base_price: x.base_price != null ? x.base_price : '',
@@ -68,6 +79,34 @@ export function HotelForm() {
       .catch((e) => setError(e.message || '加载失败'))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (isEdit || loading || draftRestored) return;
+    const draft = load();
+    if (draft && draft.data) {
+      const d = draft.data;
+      if (d.name_cn || d.city || d.address) {
+        const shouldRestore = window.confirm('发现未保存的草稿，是否恢复？');
+        if (shouldRestore) {
+          setName_cn(d.name_cn || '');
+          setName_en(d.name_en || '');
+          setCity(d.city || '');
+          setAddress(d.address || '');
+          setStar_level(d.star_level || '');
+          setOpen_date(d.open_date || '');
+          setImages(d.images?.length ? d.images : ['']);
+          setTags(d.tags?.length ? d.tags : ['']);
+          setFacilities(d.facilities?.length ? d.facilities : ['']);
+          setNearby_traffic(d.nearby_traffic?.length ? d.nearby_traffic : ['']);
+          setNearby_attractions(d.nearby_attractions?.length ? d.nearby_attractions : ['']);
+          setRooms(d.rooms?.length ? d.rooms : [{ type_name: '', base_price: '' }]);
+          setDraftRestored(true);
+        } else {
+          clear();
+        }
+      }
+    }
+  }, [isEdit, loading]);
 
   const addRow = (setter, emptyItem) => {
     setter((prev) => [...prev, emptyItem]);
@@ -100,6 +139,8 @@ export function HotelForm() {
     const imagesFiltered = images.filter((u) => String(u).trim());
     const tagsFiltered = tags.filter((t) => String(t).trim());
     const facilitiesFiltered = facilities.filter((f) => String(f).trim());
+    const nearby_trafficFiltered = nearby_traffic.filter((t) => String(t).trim());
+    const nearby_attractionsFiltered = nearby_attractions.filter((a) => String(a).trim());
     const roomsFiltered = rooms
       .filter((r) => r.type_name != null && r.base_price !== '' && r.base_price != null)
       .map((r) => ({ type_name: r.type_name, base_price: Number(r.base_price) }));
@@ -114,6 +155,8 @@ export function HotelForm() {
       images: imagesFiltered,
       tags: tagsFiltered,
       facilities: facilitiesFiltered,
+      nearby_traffic: nearby_trafficFiltered,
+      nearby_attractions: nearby_attractionsFiltered,
       rooms: roomsFiltered,
     };
   };
@@ -130,6 +173,7 @@ export function HotelForm() {
     const promise = isEdit ? merchant.updateHotel(id, payload) : merchant.createHotel(payload);
     promise
       .then((data) => {
+        clear();
         navigate(isEdit ? `/merchant/hotels/${data.id}` : '/merchant', { replace: true });
       })
       .catch((e) => setError(e.message || '保存失败'))
@@ -272,6 +316,54 @@ export function HotelForm() {
             onClick={() => addRow(setFacilities, '')}
           >
             + 添加设施
+          </button>
+
+          <h2 style={{ marginTop: 24 }}>周边交通</h2>
+          {nearby_traffic.map((item, index) => (
+            <div key={index} className="pc-form-group" style={{ display: 'flex', gap: 8 }}>
+              <input
+                placeholder="如：地铁1号线XX站步行5分钟"
+                style={{ flex: 1, maxWidth: 400 }}
+                value={item}
+                onChange={(e) =>
+                  setNearby_traffic((prev) => prev.map((t, i) => (i === index ? e.target.value : t)))
+                }
+              />
+              <button
+                type="button"
+                className="pc-btn pc-btn-ghost pc-btn-sm"
+                onClick={() => removeRow(setNearby_traffic, index)}
+              >
+                删除
+              </button>
+            </div>
+          ))}
+          <button type="button" className="pc-btn pc-btn-ghost pc-btn-sm" onClick={() => addRow(setNearby_traffic, '')}>
+            + 添加周边交通
+          </button>
+
+          <h2 style={{ marginTop: 24 }}>周边热门景点</h2>
+          {nearby_attractions.map((item, index) => (
+            <div key={index} className="pc-form-group" style={{ display: 'flex', gap: 8 }}>
+              <input
+                placeholder="如：XX景区车程10分钟"
+                style={{ flex: 1, maxWidth: 400 }}
+                value={item}
+                onChange={(e) =>
+                  setNearby_attractions((prev) => prev.map((a, i) => (i === index ? e.target.value : a)))
+                }
+              />
+              <button
+                type="button"
+                className="pc-btn pc-btn-ghost pc-btn-sm"
+                onClick={() => removeRow(setNearby_attractions, index)}
+              >
+                删除
+              </button>
+            </div>
+          ))}
+          <button type="button" className="pc-btn pc-btn-ghost pc-btn-sm" onClick={() => addRow(setNearby_attractions, '')}>
+            + 添加周边热门景点
           </button>
 
           <h2 style={{ marginTop: 24 }}>房型与价格</h2>

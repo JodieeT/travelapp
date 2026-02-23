@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Layout } from '../../components/Layout';
-import {useEffect, useState} from "react";
-import {merchant} from "../../api/request.js";
+import { useEffect, useState, useCallback } from "react";
+import { merchant } from "../../api/request.js";
+import { usePriceStream } from '../../hooks/usePriceStream';
 
 const STATUS_MAP = {
   draft: { label: '草稿', className: 'pc-status-draft' },
@@ -11,16 +12,37 @@ const STATUS_MAP = {
   offline: { label: '已下线', className: 'pc-status-offline' },
 }
 
+const PAGE_SIZE = 10;
+
 export function HotelList() {
   const [hotels, setHotels] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const fetchHotels = useCallback(() => {
+    return merchant.getHotels({ page, limit: PAGE_SIZE })
+  }, [page])
+
+  const handlePriceUpdate = useCallback(() => {
+    fetchHotels().then((data) => {
+      setHotels(data.list || []);
+      setTotal(data.total || 0);
+    }).catch(() => {});
+  }, [fetchHotels])
+
+  usePriceStream(handlePriceUpdate)
 
   useEffect(() => {
     let cancel = false
-    merchant.getHotels().then((data) => {
+    setLoading(true)
+    fetchHotels().then((data) => {
       if (!cancel) {
-        setHotels(data)
+        setHotels(data.list || [])
+        setTotal(data.total || 0)
       }
     }).catch((e) => {
       if (!cancel) {
@@ -31,15 +53,18 @@ export function HotelList() {
         setLoading(false)
       }
     })
-    return () => {cancel = true}
-  }, [])
+    return () => { cancel = true }
+  }, [fetchHotels])
+
+  const canPrev = page > 1;
+  const canNext = page < totalPages;
 
   return (
     <Layout>
       <h1 className="pc-page-title">我的酒店</h1>
       <div className="pc-card">
         {loading && <p className="pc-empty">加载中...</p>}
-        {hotels.length === 0 && <p className="pc-empty">暂无酒店，<Link to="/merchant/hotels/new">新建酒店</Link></p>}
+        {hotels.length === 0 && !loading && <p className="pc-empty">暂无酒店，<Link to="/merchant/hotels/new">新建酒店</Link></p>}
         <p style={{ marginTop: 16 }}>
           <Link to="/merchant/hotels/new" className="pc-btn pc-btn-primary">新建酒店</Link>
         </p>
@@ -73,7 +98,7 @@ export function HotelList() {
                           ))}
                         </td>
                         <td>
-                          <span className={`pc-status ${STATUS_MAP[hotel.status].className}`}>{STATUS_MAP[hotel.status].label}</span>
+                          <span className={`pc-status ${STATUS_MAP[hotel.status]?.className}`}>{STATUS_MAP[hotel.status]?.label || hotel.status}</span>
                         </td>
                         <td>
                           <Link to={`/merchant/hotels/${hotel.id}`} className="pc-btn pc-btn-ghost pc-btn-sm">
@@ -92,6 +117,29 @@ export function HotelList() {
             </tbody>
           </table>
         </div>
+        {total > PAGE_SIZE && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16 }}>
+            <span style={{ color: '#718096', fontSize: 14 }}>
+              第 {page} / {totalPages} 页，共 {total} 条
+            </span>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                className="pc-btn pc-btn-ghost pc-btn-sm"
+                disabled={!canPrev || loading}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+              >
+                上一页
+              </button>
+              <button
+                className="pc-btn pc-btn-ghost pc-btn-sm"
+                disabled={!canNext || loading}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              >
+                下一页
+              </button>
+            </div>
+          </div>
+        )}
       </div>}
     </Layout>
   );

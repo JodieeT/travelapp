@@ -30,20 +30,24 @@ export function HotelAuditList() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState('');
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actingId, setActingId] = useState(null);
+  const [selectedIds, setSelectedIds] = useState(new Set());
 
   const loadList = () => {
     setLoading(true);
     setError('');
     const params = { page, limit: PAGE_SIZE };
     if (status) params.status = status;
+    if (search) params.search = search;
     admin
       .getHotels(params)
       .then((data) => {
         setList(data.list || []);
         setTotal(data.total ?? 0);
+        setSelectedIds(new Set());
       })
       .catch((e) => setError(e.message || '加载失败'))
       .finally(() => setLoading(false));
@@ -51,7 +55,50 @@ export function HotelAuditList() {
 
   useEffect(() => {
     loadList();
-  }, [page, status]);
+  }, [page, status, search]);
+
+  const handleSearch = (value) => {
+    setSearch(value);
+    setPage(1);
+  };
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === list.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(list.map(h => h.id)));
+    }
+  };
+
+  const handleBatchApprove = () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`确定通过选中的 ${selectedIds.size} 个酒店？`)) return;
+    setLoading(true);
+    Promise.all([...selectedIds].map(id => admin.approveHotel(id)))
+      .then(() => loadList())
+      .catch(e => alert(e.message || '操作失败'))
+      .finally(() => setLoading(false));
+  };
+
+  const handleBatchReject = () => {
+    if (selectedIds.size === 0) return;
+    const reason = window.prompt(`请输入驳回原因（选中的 ${selectedIds.size} 个酒店）：`);
+    if (reason === null) return;
+    setLoading(true);
+    Promise.all([...selectedIds].map(id => admin.rejectHotel(id, reason)))
+      .then(() => loadList())
+      .catch(e => alert(e.message || '操作失败'))
+      .finally(() => setLoading(false));
+  };
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const canPrev = page > 1;
@@ -128,7 +175,20 @@ export function HotelAuditList() {
               <option value="draft">草稿</option>
             </select>
           </label>
+          <input
+            placeholder="搜索酒店名称/城市/地址..."
+            value={search}
+            onChange={(e) => handleSearch(e.target.value)}
+            style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid #e2e8f0', flex: 1, maxWidth: 300 }}
+          />
         </div>
+        {selectedIds.size > 0 && (
+          <div style={{ marginBottom: 16, display: 'flex', gap: 8, alignItems: 'center' }}>
+            <span style={{ color: '#3182ce' }}>已选择 {selectedIds.size} 项</span>
+            <button className="pc-btn pc-btn-success pc-btn-sm" onClick={handleBatchApprove}>批量通过</button>
+            <button className="pc-btn pc-btn-danger pc-btn-sm" onClick={handleBatchReject}>批量驳回</button>
+          </div>
+        )}
         {error && <p className="pc-error">{error}</p>}
         {loading ? (
           <p className="pc-empty">加载中...</p>
@@ -137,6 +197,13 @@ export function HotelAuditList() {
             <table className="pc-table">
               <thead>
                 <tr>
+                  <th style={{ width: 40 }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.size === list.length && list.length > 0}
+                      onChange={toggleSelectAll}
+                    />
+                  </th>
                   <th>ID</th>
                   <th>酒店名称</th>
                   <th>城市</th>
@@ -150,7 +217,7 @@ export function HotelAuditList() {
               <tbody>
                 {list.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="pc-empty">
+                    <td colSpan={9} className="pc-empty">
                       暂无数据
                     </td>
                   </tr>
@@ -162,6 +229,13 @@ export function HotelAuditList() {
                     const busy = actingId === h.id;
                     return (
                       <tr key={h.id}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(h.id)}
+                            onChange={() => toggleSelect(h.id)}
+                          />
+                        </td>
                         <td>{h.id}</td>
                         <td>{h.name_cn || '-'}</td>
                         <td>{h.city || '-'}</td>

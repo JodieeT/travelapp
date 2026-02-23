@@ -18,7 +18,9 @@ const Hotel = sequelize.define('Hotel', {
     tags: { type: DataTypes.TEXT, defaultValue: '[]' },
     facilities: { type: DataTypes.TEXT, defaultValue: '[]' },
     is_banner: { type: DataTypes.BOOLEAN, defaultValue: false },
-    banner_sort: { type: DataTypes.INTEGER, defaultValue: 0 }
+    banner_sort: { type: DataTypes.INTEGER, defaultValue: 0 },
+    nearby_traffic: { type: DataTypes.TEXT, defaultValue: '[]' },
+    nearby_attractions: { type: DataTypes.TEXT, defaultValue: '[]' }
 }, { tableName: 'Hotels' });
 
 module.exports = Hotel;

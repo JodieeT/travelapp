@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Layout } from '../../components/Layout';
 import { useEffect, useState } from 'react';
 import { admin } from '../../api/request.js';
+import { ImageViewer } from '../../components/ImageViewer.jsx';
 
 function parseJsonField(val) {
   if (val == null) return [];
@@ -195,20 +196,7 @@ export function HotelDetail() {
         <p><strong>中文名：</strong>{hotel.name_cn ?? '-'}</p>
         <p><strong>英文名：</strong>{hotel.name_en ?? '-'}</p>
         {parseJsonField(hotel.images).length > 0 && (
-          <div style={{ marginBottom: 20 }}>
-            <p><strong>图片：</strong></p>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 8 }}>
-              {parseJsonField(hotel.images).map((img, idx) => (
-                <img
-                  key={idx}
-                  src={getImageUrl(img)}
-                  alt={`酒店图片${idx + 1}`}
-                  style={{ width: 200, height: 150, objectFit: 'cover', borderRadius: 8 }}
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-              ))}
-            </div>
-          </div>
+          <ImageViewer images={parseJsonField(hotel.images)} getImageUrl={getImageUrl} />
         )}
         <p><strong>城市：</strong>{hotel.city ?? '-'}</p>
         <p><strong>地址：</strong>{hotel.address ?? '-'}</p>
@@ -241,6 +229,8 @@ export function HotelDetail() {
         </div>
         <p><strong>标签：</strong>{tagsStr}</p>
         <p><strong>设施：</strong>{facilitiesStr}</p>
+        <p><strong>周边交通：</strong>{parseJsonField(hotel.nearby_traffic).join('、') || '-'}</p>
+        <p><strong>周边热门景点：</strong>{parseJsonField(hotel.nearby_attractions).join('、') || '-'}</p>
       </div>
     </Layout>
   );

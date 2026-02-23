@@ -36,7 +36,10 @@ export const auth = {
 };
 
 export const merchant = {
-  getHotels: () => request('/api/merchant/hotels'),
+  getHotels: (params) => {
+    const q = new URLSearchParams(params).toString();
+    return request('/api/merchant/hotels' + (q ? '?' + q : ''));
+  },
   getHotel: (id) => request(`/api/merchant/hotels/${id}`),
   createHotel: (body) => request('/api/merchant/hotels', { method: 'POST', body: JSON.stringify(body) }),
   updateHotel: (id, body) => request(`/api/merchant/hotels/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
@@ -45,7 +48,7 @@ export const merchant = {
 
 export const admin = {
   getHotels: (params) => {
-    const q = new URLSearchParams(params).toString();
+    const q = new URLSearchParams({ ...params, _t: Date.now() }).toString();
     return request('/api/admin/hotels' + (q ? '?' + q : ''));
   },
   getHotel: (id) => request(`/api/admin/hotels/${id}`),

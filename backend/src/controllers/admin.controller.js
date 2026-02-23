@@ -1,23 +1,39 @@
 const { Hotel, Room } = require('../models');
+const { Sequelize } = require('sequelize');
+const { Op } = Sequelize;
 
 exports.getHotels = async (req, res) => {
     try {
-        const { status, page = 1, limit = 20 } = req.query;
+        const { status, page = 1, limit = 20, search = '' } = req.query;
         const where = {};
         if (status) where.status = status;
-        const offset = Math.max(0, (Number(page) - 1) * Math.min(Number(limit) || 20, 100));
-        const limitNum = Math.min(Number(limit) || 20, 100);
+        
+        if (search) {
+            where[Op.or] = [
+                { name_cn: { [Op.like]: `%${search}%` } },
+                { name_en: { [Op.like]: `%${search}%` } },
+                { city: { [Op.like]: `%${search}%` } },
+                { address: { [Op.like]: `%${search}%` } }
+            ];
+        }
+        
+        const pageNum = parseInt(page) || 1;
+        const limitNum = Math.min(Math.max(parseInt(limit) || 10, 1), 100);
+        const offset = (pageNum - 1) * limitNum;
 
-        const { count, rows } = await Hotel.findAndCountAll({
+        const total = await Hotel.count({ where, distinct: true });
+
+        const rows = await Hotel.findAll({
             where,
             order: [['id', 'DESC']],
-            offset,
             limit: limitNum,
-            distinct: true,
+            offset: offset,
             include: [{ model: Room, as: 'Rooms' }]
         });
-        return res.json({ total: count, list: rows });
+        
+        return res.json({ total, list: rows });
     } catch (e) {
+        console.error('Error:', e);
         return res.status(500).json({ message: 'server error' });
     }
 };

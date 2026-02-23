@@ -12,7 +12,7 @@ function parseJsonField(val) {
 exports.createHotel = async (req, res) => {
     try {
         const merchantId = req.user.id;
-        const { name_cn, name_en, city, address, star_level, open_date, images, tags, facilities, rooms } = req.body || {};
+        const { name_cn, name_en, city, address, star_level, open_date, images, tags, facilities, nearby_traffic, nearby_attractions, rooms } = req.body || {};
         if (!name_cn || !address) return res.status(400).json({ message: 'name_cn and address required' });
 
         const hotel = await Hotel.create({
@@ -26,6 +26,8 @@ exports.createHotel = async (req, res) => {
             images: JSON.stringify(parseJsonField(images)),
             tags: JSON.stringify(parseJsonField(tags)),
             facilities: JSON.stringify(parseJsonField(facilities)),
+            nearby_traffic: JSON.stringify(parseJsonField(nearby_traffic)),
+            nearby_attractions: JSON.stringify(parseJsonField(nearby_attractions)),
             is_banner: false,
             banner_sort: 0,
             status: 'draft'
@@ -51,12 +53,25 @@ exports.createHotel = async (req, res) => {
 
 exports.getMyHotels = async (req, res) => {
     try {
-        const list = await Hotel.findAll({
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+        const offset = (page - 1) * limit;
+        
+        const total = await Hotel.count({ where: { merchant_id: req.user.id } });
+
+        const rows = await Hotel.findAll({
             where: { merchant_id: req.user.id },
             order: [['id', 'DESC']],
+            limit,
+            offset,
             include: [{ model: Room, as: 'Rooms' }]
         });
-        return res.json(list);
+        return res.json({
+            list: rows,
+            total,
+            page,
+            limit
+        });
     } catch (e) {
         return res.status(500).json({ message: 'server error' });
     }
@@ -81,7 +96,7 @@ exports.updateHotel = async (req, res) => {
         if (!hotel) return res.status(404).json({ message: 'hotel not found' });
         if (hotel.status !== 'draft' && hotel.status !== 'rejected') return res.status(400).json({ message: 'only draft or rejected hotel can be edited' });
 
-        const { name_cn, name_en, city, address, star_level, open_date, images, tags, facilities, rooms } = req.body || {};
+        const { name_cn, name_en, city, address, star_level, open_date, images, tags, facilities, nearby_traffic, nearby_attractions, rooms } = req.body || {};
         if (name_cn != null) hotel.name_cn = name_cn;
         if (name_en != null) hotel.name_en = name_en;
         if (city != null) hotel.city = city;
@@ -91,6 +106,8 @@ exports.updateHotel = async (req, res) => {
         if (images !== undefined) hotel.images = JSON.stringify(parseJsonField(images));
         if (tags !== undefined) hotel.tags = JSON.stringify(parseJsonField(tags));
         if (facilities !== undefined) hotel.facilities = JSON.stringify(parseJsonField(facilities));
+        if (nearby_traffic !== undefined) hotel.nearby_traffic = JSON.stringify(parseJsonField(nearby_traffic));
+        if (nearby_attractions !== undefined) hotel.nearby_attractions = JSON.stringify(parseJsonField(nearby_attractions));
         await hotel.save();
 
         if (Array.isArray(rooms)) {
