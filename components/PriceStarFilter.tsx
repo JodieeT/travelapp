@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { 
+  STAR_OPTIONS, 
+  PRICE_OPTIONS,
+  MODAL_ANIMATION_TYPE,
+  MODAL_TRANSPARENT
+} from '../constants/data';
 
 interface FilterOption {
   id: string;
@@ -14,22 +20,6 @@ interface PriceStarFilterProps {
   initialStarRating?: string;
   initialPriceRange?: string;
 }
-
-const starOptions: FilterOption[] = [
-  { id: '1', label: '不限', value: '' },
-  { id: '2', label: '二星级', value: '2' },
-  { id: '3', label: '三星级', value: '3' },
-  { id: '4', label: '四星级', value: '4' },
-  { id: '5', label: '五星级', value: '5' },
-];
-
-const priceOptions: FilterOption[] = [
-  { id: '1', label: '不限', value: '' },
-  { id: '2', label: '¥0-100', value: '0-100' },
-  { id: '3', label: '¥100-300', value: '100-300' },
-  { id: '4', label: '¥300-500', value: '300-500' },
-  { id: '5', label: '¥500+', value: '500+' },
-];
 
 const PriceStarFilter: React.FC<PriceStarFilterProps> = ({
   isVisible,
@@ -63,8 +53,8 @@ const PriceStarFilter: React.FC<PriceStarFilterProps> = ({
   };
 
   const getSelectedLabel = () => {
-    const starLabel = starOptions.find(opt => opt.value === selectedStar)?.label || '不限';
-    const priceLabel = priceOptions.find(opt => opt.value === selectedPrice)?.label || '不限';
+    const starLabel = STAR_OPTIONS.find(opt => opt.value === selectedStar)?.label || '不限';
+    const priceLabel = PRICE_OPTIONS.find(opt => opt.value === selectedPrice)?.label || '不限';
     
     if (starLabel === '不限' && priceLabel === '不限') {
       return '价格/星级';
@@ -80,8 +70,8 @@ const PriceStarFilter: React.FC<PriceStarFilterProps> = ({
   return (
     <Modal
       visible={isVisible}
-      transparent={true}
-      animationType="slide"
+      transparent={MODAL_TRANSPARENT}
+      animationType={MODAL_ANIMATION_TYPE as any}
       onRequestClose={onClose}
     >
       <View className="flex-1 justify-end">
@@ -91,7 +81,7 @@ const PriceStarFilter: React.FC<PriceStarFilterProps> = ({
             <Text className="text-lg font-bold">价格/星级筛选</Text>
             <TouchableOpacity onPress={onClose}>
               <Text className="text-gray-500 text-lg">✕</Text>
-            </TouchableOpacity>
+              </TouchableOpacity>
           </View>
 
           <ScrollView className="p-4 max-h-96">
@@ -99,7 +89,7 @@ const PriceStarFilter: React.FC<PriceStarFilterProps> = ({
             <View className="mb-6">
               <Text className="text-base font-semibold mb-3 text-gray-800">酒店星级</Text>
               <View className="flex-row flex-wrap gap-2">
-                {starOptions.map((option) => (
+                {STAR_OPTIONS.map((option) => (
                   <TouchableOpacity
                     key={option.id}
                     className={`px-4 py-2 rounded-full border ${
@@ -125,7 +115,7 @@ const PriceStarFilter: React.FC<PriceStarFilterProps> = ({
             <View className="mb-6">
               <Text className="text-base font-semibold mb-3 text-gray-800">价格范围</Text>
               <View className="flex-row flex-wrap gap-2">
-                {priceOptions.map((option) => (
+                {PRICE_OPTIONS.map((option) => (
                   <TouchableOpacity
                     key={option.id}
                     className={`px-4 py-2 rounded-full border ${

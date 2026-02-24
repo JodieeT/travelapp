@@ -4,33 +4,32 @@ import { Link } from 'expo-router'
 import * as Location from 'expo-location'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import TagSelector from './TagSelector';
-import PriceStarFilter from './PriceStarFilter'; // 使用新的价格星级筛选组件
-
-const tags = ["免费停车", "亲子", "机场附近","宠物", "地铁附近", "景点附近"];
-
-// 城市数据
-const cities = [
-  { id: '1', name: '北京' },
-  { id: '2', name: '上海' },
-  { id: '3', name: '广州' },
-  { id: '4', name: '深圳' },
-  { id: '5', name: '杭州' },
-  { id: '6', name: '成都' },
-  { id: '7', name: '南京' },
-  { id: '8', name: '武汉' },
-  { id: '9', name: '西安' },
-  { id: '10', name: '重庆' },
-];
+import PriceStarFilter from './PriceStarFilter';
+import DateRangePicker from './DateRangePicker';
+import CitySelector from './CitySelector';
+import { 
+  HOTEL_TAGS, 
+  DEFAULT_CITY, 
+  LOCATION_CACHE_KEY,
+  DEFAULT_CHECK_IN_DAYS,
+  DEFAULT_CHECK_OUT_DAYS
+} from '../constants/data';
 
 const SearchCard = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [currentCity, setCurrentCity] = useState<string>('上海');
-  const [isCitySelectorVisible, setIsCitySelectorVisible] = useState<boolean>(false);
-  const [locationPermission, setLocationPermission] = useState<boolean>(false);
+  const [currentCity, setCurrentCity] = useState<string>(DEFAULT_CITY);
+  const [keyword, setKeyword] = useState<string>(''); // 添加keyword状态
   const [isPriceStarFilterVisible, setIsPriceStarFilterVisible] = useState<boolean>(false); // 新增状态
   const [priceStarFilters, setPriceStarFilters] = useState({ // 新增筛选状态
     starRating: '',
     priceRange: ''
+  });
+  // 新增日期状态
+  const [checkInDate, setCheckInDate] = useState<Date>(new Date());
+  const [checkOutDate, setCheckOutDate] = useState<Date>(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + DEFAULT_CHECK_OUT_DAYS);
+    return tomorrow;
   });
 
   // 切换标签选中状态
@@ -40,6 +39,12 @@ const SearchCard = () => {
     } else {
       setSelectedTags([...selectedTags, tag]);
     }
+  };
+
+  // 处理日期选择变化
+  const handleDateChange = (startDate: Date, endDate: Date) => {
+    setCheckInDate(startDate);
+    setCheckOutDate(endDate);
   };
 
   // 处理价格星级筛选应用
@@ -66,85 +71,78 @@ const SearchCard = () => {
     return parts.join(' · ');
   };
 
-  // 检查并请求位置权限
-  const checkLocationPermission = async () => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      setLocationPermission(status === 'granted');
-      return status === 'granted';
-    } catch (error) {
-      console.error('权限请求失败:', error);
-      return false;
+  // 获取API参数对象
+  const getApiParams = () => {
+    const params: any = {
+      city: currentCity
+    };
+    
+    if (keyword) params.keyword = keyword;
+    
+    // 添加日期参数
+    params.checkInDate = checkInDate.toISOString().split('T')[0];
+    params.checkOutDate = checkOutDate.toISOString().split('T')[0];
+    
+    // 处理星级
+    if (priceStarFilters.starRating) {
+      params.starLevel = parseInt(priceStarFilters.starRating);
     }
-  };
-
-  // 获取当前位置
-  const getCurrentLocation = async () => {
-    try {
-      // 先检查权限
-      const hasPermission = await checkLocationPermission();
-      if (!hasPermission) {
-        Alert.alert('权限不足', '请在设置中开启位置权限以使用定位功能');
-        // 从缓存中获取上次定位的城市
-        const cachedCity = await AsyncStorage.getItem('lastLocatedCity');
-        if (cachedCity) {
-          setCurrentCity(cachedCity);
-        } else {
-          setCurrentCity('上海'); // 默认城市
-        }
-        return;
-      }
-
-      setCurrentCity('定位中...');
-      
-      // 获取位置
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-
-      // 反向地理编码获取城市名称
-      const reverseGeocode = await Location.reverseGeocodeAsync({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-
-      if (reverseGeocode.length > 0) {
-        const city = reverseGeocode[0].city || reverseGeocode[0].region || '未知城市';
-        setCurrentCity(city);
-        
-        // 缓存定位结果
-        await AsyncStorage.setItem('lastLocatedCity', city);
+    
+    // 处理价格范围
+    if (priceStarFilters.priceRange) {
+      const priceRange = priceStarFilters.priceRange;
+      if (priceRange.includes('-')) {
+        const [min, max] = priceRange.split('-');
+        if (min) params.minPrice = parseInt(min);
+        if (max) params.maxPrice = parseInt(max);
       } else {
-        setCurrentCity('定位失败');
-      }
-    } catch (error) {
-      console.error('定位失败:', error);
-      setCurrentCity('定位失败');
-      
-      // 失败时从缓存获取
-      const cachedCity = await AsyncStorage.getItem('lastLocatedCity');
-      if (cachedCity) {
-        setCurrentCity(cachedCity);
-      } else {
-        setCurrentCity('上海');
+        params.minPrice = parseInt(priceRange);
       }
     }
+    
+    // 处理标签
+    if (selectedTags.length > 0) {
+      params.tags = selectedTags;
+    }
+    
+    return params;
   };
 
-  // 选择城市
-  const selectCity = (cityName: string) => {
-    setCurrentCity(cityName);
-    setIsCitySelectorVisible(false);
-  };
-
-  // 打开城市选择器
-  const openCitySelector = () => {
-    setIsCitySelectorVisible(true);
-  };
-
-  // 关闭城市选择器
-  const closeCitySelector = () => {
-    setIsCitySelectorVisible(false);
+  // 获取路由参数对象（用于导航）- 保持与API参数一致
+  const getRouteParams = () => {
+    const routeParams: any = {
+      city: currentCity
+    };
+    
+    if (keyword) routeParams.keyword = keyword;
+    
+    // 添加日期参数
+    routeParams.checkInDate = checkInDate.toISOString().split('T')[0];
+    routeParams.checkOutDate = checkOutDate.toISOString().split('T')[0];
+    
+    // starLevel应该传递数值而不是字符串
+    if (priceStarFilters.starRating) {
+      routeParams.starLevel = parseInt(priceStarFilters.starRating);
+    }
+    
+    // priceRange需要分解为minPrice和maxPrice
+    if (priceStarFilters.priceRange) {
+      const range = priceStarFilters.priceRange;
+      if (range.includes('-')) {
+        const [min, max] = range.split('-');
+        if (min) routeParams.minPrice = parseInt(min);
+        if (max) routeParams.maxPrice = parseInt(max);
+      } else {
+        routeParams.minPrice = parseInt(range);
+      }
+    }
+    
+    // tags应该传递数组而不是字符串
+    if (selectedTags.length > 0) {
+      routeParams.tags = selectedTags;
+    }
+    
+    return routeParams;
   };
 
   // 打开价格星级筛选
@@ -157,56 +155,47 @@ const SearchCard = () => {
     setIsPriceStarFilterVisible(false);
   };
 
-  // 组件挂载时尝试获取位置
+  // 组件挂载时初始化城市
   useEffect(() => {
-    const initializeLocation = async () => {
+    const initializeCity = async () => {
       // 首先尝试从缓存获取城市
-      const cachedCity = await AsyncStorage.getItem('lastLocatedCity');
+      const cachedCity = await AsyncStorage.getItem(LOCATION_CACHE_KEY);
       if (cachedCity) {
         setCurrentCity(cachedCity);
       } else {
-        // 如果没有缓存，尝试定位
-        await getCurrentLocation();
+        // 如果没有缓存，默认设置为上海
+        setCurrentCity(DEFAULT_CITY);
       }
     };
 
-    initializeLocation();
+    initializeCity();
   }, []);
 
   return (
-    <View className="mx-4 mt-4 p-4 bg-white rounded-2xl shadow-md">
+    <View className="mx-0 mt-0 p-4 bg-white rounded-2xl shadow-lg">
       {/* 1️⃣ 城市 + 搜索 */}
       <View className="flex-row items-center justify-between mb-3">
-        <View className="flex-row items-center">
-          <TouchableOpacity 
-            onPress={openCitySelector}
-            className="flex-row items-center"
-          >
-            <Text className="text-base font-semibold mr-1">{currentCity}</Text>
-            <Text className="text-base">▾</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            onPress={getCurrentLocation}
-            className="ml-3 px-2 py-1 bg-blue-100 rounded-full"
-          >
-            <Text className="text-blue-600 text-xs">定位</Text>
-          </TouchableOpacity>
-        </View>
+        <CitySelector 
+          currentCity={currentCity}
+          onCityChange={setCurrentCity}
+        />
         
         <TextInput
           placeholder="位置/品牌/酒店"
           placeholderTextColor="grey"
+          value={keyword}
+          onChangeText={setKeyword}
           className="flex-1 ml-3 bg-gray-100 px-3 py-2 rounded-lg"
         />
       </View>
       
-      {/* 2️⃣ 日期 */}
-      <View className="flex-row justify-between mb-3">
-        <Text className="text-gray-700">01月09日 今天</Text>
-        <Text className="text-gray-700">01月10日 明天</Text>
-        <Text className="text-gray-400">共1晚</Text>
-      </View>
+      {/* 2️⃣ 日期选择器 */}
+      <DateRangePicker
+        startDate={checkInDate}
+        endDate={checkOutDate}
+        onDateChange={handleDateChange}
+        className="mb-3"
+      />
       
       {/* 3️⃣ 价格/星级筛选 */}
       <TouchableOpacity 
@@ -217,46 +206,20 @@ const SearchCard = () => {
       </TouchableOpacity>
       
       {/* 4️⃣ 标签 */}
-      <TagSelector tags={tags} selectedTags={selectedTags} onToggleTag={toggleTag} />
+      <TagSelector tags={HOTEL_TAGS} selectedTags={selectedTags} onToggleTag={toggleTag} />
       
-      {/* 5️⃣ 查询按钮 */}
-      <Link href="/list" asChild>
+      {/* 5️⃣ 查询按钮 - 传递筛选参数 */}
+      <Link 
+        href={{
+          pathname: "/list",
+          params: getRouteParams()
+        }} 
+        asChild
+      >
         <TouchableOpacity className="bg-blue-500 py-3 rounded-xl items-center mt-4">
           <Text className="text-white font-semibold text-base">查询</Text>
         </TouchableOpacity>
       </Link>
-
-      {/* 城市选择器模态框 */}
-      <Modal
-        visible={isCitySelectorVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={closeCitySelector}
-      >
-        <View className="flex-1 justify-end">
-          <View className="bg-white rounded-t-2xl p-4 max-h-96">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-lg font-bold">选择城市</Text>
-              <TouchableOpacity onPress={closeCitySelector}>
-                <Text className="text-gray-500 text-lg">✕</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <FlatList
-              data={cities}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  className="py-3 px-4 border-b border-gray-100"
-                  onPress={() => selectCity(item.name)}
-                >
-                  <Text className="text-base text-gray-800">{item.name}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </View>
-      </Modal>
 
       {/* 价格星级筛选模态框 */}
       <PriceStarFilter
@@ -267,7 +230,7 @@ const SearchCard = () => {
         initialPriceRange={priceStarFilters.priceRange}
       />
     </View>
-  )
-}
+  );
+};
 
-export default SearchCard
+export default SearchCard;

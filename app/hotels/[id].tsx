@@ -1,15 +1,43 @@
 import BottomBar from "@/components/BottomBar";
 import TopNav from "@/components/TopNav";
+import DateRangePicker from "@/components/DateRangePicker";
 import useFetch from "@/services/useFetch";
 import { fetchHotelDetail } from "@/services/api";
 import { useLocalSearchParams } from "expo-router";
 import { View, ScrollView, FlatList, Image, Text, TouchableOpacity, Dimensions } from "react-native";
+import { useState, useEffect } from "react";
 
 const { width } = Dimensions.get("window");
 
 export default function HotelDetail() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, checkInDate, checkOutDate } = useLocalSearchParams<{ 
+    id: string; 
+    checkInDate?: string; 
+    checkOutDate?: string 
+  }>();
+  
   const { data: hotel, loading, error } = useFetch(() => fetchHotelDetail(id || ''));
+  
+  // 日期状态管理
+  const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>();
+  const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>();
+
+  // 从路由参数初始化日期
+  useEffect(() => {
+    if (checkInDate) {
+      setSelectedStartDate(new Date(checkInDate));
+    }
+    if (checkOutDate) {
+      setSelectedEndDate(new Date(checkOutDate));
+    }
+  }, [checkInDate, checkOutDate]);
+
+  // 处理日期变更
+  const handleDateChange = (startDate: Date, endDate: Date) => {
+    setSelectedStartDate(startDate);
+    setSelectedEndDate(endDate);
+    // 这里可以添加重新获取房间价格的逻辑
+  };
 
   // 渲染图片轮播
   const renderImageSwiper = () => {
@@ -73,14 +101,15 @@ export default function HotelDetail() {
 
   // 渲染日期选择横幅
   const renderDateBanner = () => (
-    <TouchableOpacity className="bg-white mt-3 p-4">
-      <Text className="font-semibold">
-        1月9日 → 1月10日 · 1晚
-      </Text>
-      <Text className="text-gray-400 text-xs mt-1">
-        点击修改入住日期
-      </Text>
-    </TouchableOpacity>
+    <View className="bg-white mt-3 p-4">
+      <DateRangePicker
+        startDate={selectedStartDate}
+        endDate={selectedEndDate}
+        onDateChange={handleDateChange}
+        placeholder="请选择入住和离店日期"
+        className="bg-gray-50"
+      />
+    </View>
   );
 
   // 渲染房间列表
@@ -147,17 +176,25 @@ export default function HotelDetail() {
     <View className="flex-1 bg-gray-100">
       <TopNav hotelName={hotel?.name_cn || "酒店详情"} />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      {/* 主内容区域 */}
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        className="flex-1"
+        contentContainerClassName="pb-24" // 为BottomBar留出足够的空间 (p-4 = 16px + 一些额外空间)
+      >
         {renderImageSwiper()}
         {renderHotelInfo()}
         {renderDateBanner()}
         {renderRoomList()}
       </ScrollView>
 
-      <BottomBar 
-        minPrice={hotel?.min_price} 
-        onBookPress={handleBookPress}
-      />
+      {/* BottomBar固定在底部 */}
+      <View className="absolute bottom-0 left-0 right-0">
+        <BottomBar 
+          minPrice={hotel?.min_price} 
+          onBookPress={handleBookPress}
+        />
+      </View>
     </View>
   );
 }

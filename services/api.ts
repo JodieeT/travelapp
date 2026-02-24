@@ -121,6 +121,8 @@ export const fetchHotels = async(
   minPrice?: number,
   maxPrice?: number,
   tags?: string[],
+  checkInDate?: string,  // 新增入住日期参数
+  checkOutDate?: string, // 新增退房日期参数
   page: number = 1,
   limit: number = 10
 ): Promise<HotelListResponse> => {
@@ -133,6 +135,8 @@ export const fetchHotels = async(
   if (minPrice !== undefined) params.append('minPrice', minPrice.toString());
   if (maxPrice !== undefined) params.append('maxPrice', maxPrice.toString());
   if (tags && tags.length > 0) params.append('tags', tags.join(','));
+  if (checkInDate) params.append('checkInDate', checkInDate);  // 添加入住日期
+  if (checkOutDate) params.append('checkOutDate', checkOutDate); // 添加退房日期
   params.append('page', page.toString());
   params.append('limit', limit.toString());
 
