@@ -63,11 +63,11 @@ yarn install
 ```bash
 # 启动Web开发服务器
 npm run web
-
+开发者模式运行手机模拟
 # 使用expo选择web/ios
 npm expo start
 ```
-
+如果处于同一网络，使用expo go扫描二维码，即可打开
 ### 构建生产版本
 ```bash
 # Web构建
@@ -76,6 +76,32 @@ npm run build
 # 移动端构建
 npm run build:mobile
 ```
+
+## ⚙️ 后端配置
+
+### API服务配置说明
+
+本项目采用**前后端分离架构**，前端通过API与后端服务通信。
+
+#### BASE_URL配置机制
+```typescript
+// services/api.ts 中的配置
+const BASE_URL = 'http://192.168.71.54:3000'; // 由后端部署地址决定
+```
+
+**配置说明：**
+- `BASE_URL` 应设置为后端服务的实际部署地址
+- 由后端开发团队提供具体的IP地址和端口号
+- 本地开发时可根据后端实际运行地址进行调整
+- 生产环境应使用域名而非IP地址
+
+#### 支持的API端点：
+- `GET /api/hotels` - 获取酒店列表（支持分页和筛选）
+- `GET /api/hotels/:id` - 获取酒店详情
+- `GET /api/banners` - 获取首页横幅数据
+- `GET /api/cities` - 获取城市列表
+- `GET /api/tags` - 获取标签列表
+
 
 ## 📱 功能特性
 
@@ -188,7 +214,7 @@ DEFAULT_CITY=上海
 3. **样式不生效**: 确认NativeWind配置正确
 
 ### 运行时问题
-1. **API请求失败**: 检查后端服务是否启动
+1. **API请求失败**: 检查后端服务是否启动，确认BASE_URL配置正确
 2. **数据不更新**: 检查筛选条件和分页状态
 3. **组件渲染异常**: 查看控制台错误信息
 

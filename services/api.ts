@@ -1,5 +1,15 @@
+/**
+ * API服务模块
+ * 
+ * 注意：BASE_URL应由后端提供具体的部署地址
+ * 开发时请根据后端实际运行地址进行配置
+ * 生产环境建议使用域名而非IP地址
+ */
+
+const BASE_URL_DEV = 'http://192.168.71.54:3000'; // 由后端部署地址决定
+
 export const BACKEND_CONFIG = {
-    BASE_URL: 'http://localhost:3000',
+    BASE_URL: BASE_URL_DEV,
     headers:{
         accept: 'application/json',
     }
