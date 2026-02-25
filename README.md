@@ -1,142 +1,217 @@
-# Welcome to your Expo app 👋
+# Easy Stay Client
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+一个现代化的酒店预订移动应用客户端，使用React Native和Expo构建。
 
-## Get started
+## 🏗️ 项目架构
 
-1. Install dependencies
+### 技术栈
+- **框架**: React Native + Expo
+- **路由**: Expo Router (基于React Navigation)
+- **状态管理**: React Hooks + AsyncStorage
+- **UI库**: Tailwind CSS (NativeWind)
+- **类型检查**: TypeScript
+- **数据获取**: 自定义Hook + Fetch API
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Data Management
-
-### 统一数据常量管理
-
-为了提高代码的可维护性和一致性，项目采用了统一的数据常量管理模式：
-
-#### 常量文件位置
-`constants/data.ts` - 集中管理所有静态数据和配置常量
-
-#### 管理的数据类型
-- **城市数据** (`CITIES`) - 支持的主要城市列表
-- **星级选项** (`STAR_OPTIONS`) - 酒店星级筛选选项
-- **价格范围** (`PRICE_OPTIONS`) - 价格区间筛选选项
-- **酒店标签** (`HOTEL_TAGS`) - 酒店特色标签
-- **默认配置** - 默认城市、日期、筛选条件等
-- **系统常量** - 缓存键名、超时时间、模态框配置等
-
-#### 使用示例
-
-```typescript
-// 导入常量
-import { 
-  CITIES, 
-  STAR_OPTIONS, 
-  PRICE_OPTIONS, 
-  DEFAULT_CITY 
-} from '../constants/data';
-
-// 在组件中使用
-const MyComponent = () => {
-  const [city, setCity] = useState<string>(DEFAULT_CITY);
-  
-  return (
-    <FlatList
-      data={CITIES}
-      // ... 其他属性
-    />
-  );
-};
+### 目录结构
+```
+easy-stay-client/
+├── app/                    # 页面路由组件
+│   ├── _layout.tsx        # 根布局
+│   ├── index.tsx          # 首页
+│   ├── list.tsx           # 酒店列表页
+│   └── hotels/            # 酒店详情页
+│       └── [id].tsx
+├── components/            # 可复用组件
+│   ├── ui/               # 基础UI组件
+│   ├── Banner.tsx        # 首页横幅
+│   ├── CitySelector.tsx  # 城市选择器
+│   ├── DateRangePicker.tsx # 日期选择器
+│   ├── HotelCard.tsx     # 酒店卡片
+│   ├── PriceStarFilter.tsx # 价格星级筛选
+│   ├── SearchCard.tsx    # 搜索卡片
+│   └── TagSelector.tsx   # 标签选择器
+├── constants/            # 常量定义
+│   ├── data.ts          # 静态数据和配置
+│   └── images.ts        # 图片资源
+├── hooks/               # 自定义Hooks
+│   └── useSearchFilters.ts # 搜索筛选状态管理
+├── interfaces/          # TypeScript接口定义
+│   └── interfaces.d.ts
+├── services/            # 业务逻辑层
+│   ├── api.ts          # API服务
+│   └── useFetch.ts     # 数据获取Hook
+├── utils/              # 工具函数
+│   └── dateUtils.ts    # 日期处理工具
+└── package.json
 ```
 
-#### 优势
-- ✨ **统一管理**: 所有静态数据集中在一个文件中
-- 🔧 **易于维护**: 修改数据只需在一个地方进行
-- 🔄 **一致性保证**: 确保整个应用使用相同的数据源
-- 📈 **扩展性强**: 添加新城市或选项非常简单
-- 🎯 **类型安全**: TypeScript 提供完整的类型检查
+## 🚀 快速开始
 
-## Components
+### 环境要求
+- Node.js >= 16
+- npm 或 yarn
+- Expo CLI
 
-### CitySelector 组件
-
-这是一个可复用的城市选择组件，支持以下功能：
-
-#### 功能特性
-- 🌍 城市列表选择（支持10个主要城市）
-- 📍 GPS定位获取当前位置
-- 💾 自动缓存最近定位结果
-- 🎨 美观的模态框界面
-- 🔧 灵活的配置选项
-
-#### 使用方法
-
-```typescript
-import CitySelector from '../components/CitySelector';
-
-// 基础用法
-<CitySelector 
-  currentCity={selectedCity}
-  onCityChange={setSelectedCity}
-/>
-
-// 不带定位功能的用法
-<CitySelector 
-  currentCity={selectedCity}
-  onCityChange={setSelectedCity}
-  showLocator={false}
-/>
-```
-
-#### Props 说明
-
-| 属性名 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| currentCity | string | 是 | - | 当前选中的城市 |
-| onCityChange | (city: string) => void | 是 | - | 城市变更回调函数 |
-| showLocator | boolean | 否 | true | 是否显示定位按钮 |
-
-#### 使用示例
-
-详细使用示例请参考 `components/CitySelectorExample.tsx` 文件。
-
-## Get a fresh project
-
-When you're ready, run:
-
+### 安装依赖
 ```bash
-npm run reset-project
+npm install
+# 或
+yarn install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 启动开发服务器
+```bash
+# 启动Web开发服务器
+npm run web
 
-## Learn more
+# 使用expo选择web/ios
+npm expo start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+### 构建生产版本
+```bash
+# Web构建
+npm run build
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+# 移动端构建
+npm run build:mobile
+```
 
-## Join the community
+## 📱 功能特性
 
-Join our community of developers creating universal apps.
+### 核心功能
+- 🔍 **智能搜索**: 支持城市、关键词、日期等多维度搜索
+- 🏨 **酒店浏览**: 流畅的酒店列表展示和详情查看
+- 📅 **日期选择**: 直观的日历式日期选择器
+- 💰 **价格筛选**: 灵活的价格区间和星级筛选
+- 🏷️ **标签过滤**: 基于特色的标签筛选系统
+- 📱 **响应式设计**: 适配不同屏幕尺寸的移动端体验
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### 技术亮点
+- **分页加载**: 上滑自动加载更多数据
+- **状态持久化**: 搜索条件自动保存到本地存储
+- **组件复用**: 高度模块化的组件设计
+- **类型安全**: 完整的TypeScript类型定义
+- **性能优化**: 虚拟列表和懒加载技术
+
+## 🛠️ 开发规范
+
+### 代码组织原则
+1. **组件复用**: 相同功能的UI组件统一抽象到components目录
+2. **状态管理**: 复杂状态逻辑提取到自定义Hooks
+3. **工具函数**: 通用工具函数集中到utils目录
+4. **常量管理**: 静态数据统一在constants中定义
+
+### 命名规范
+- 组件文件: PascalCase (`HotelCard.tsx`)
+- Hook文件: use开头 (`useSearchFilters.ts`)
+- 工具函数: camelCase (`dateToString`)
+- 常量: UPPER_SNAKE_CASE (`DEFAULT_CITY`)
+
+### TypeScript规范
+- 所有组件和函数都需要明确的类型定义
+- 接口定义集中管理在`interfaces/`目录
+- 避免使用`any`类型，优先使用具体类型或泛型
+
+## 🔄 数据流说明
+
+### 搜索状态管理
+```typescript
+// 使用统一的搜索筛选Hook
+const { 
+  filters,           // 当前筛选条件
+  updateFilters,     // 更新筛选条件
+  getApiParams,      // 获取API参数
+  getRouteParams     // 获取路由参数
+} = useSearchFilters();
+```
+
+### 数据获取流程
+1. 用户操作触发筛选条件更新
+2. `useSearchFilters`自动保存到本地存储
+3. `useFetch`根据条件自动获取数据
+4. 组件渲染更新后的数据
+
+### 分页机制
+- 初始加载第1页数据
+- 上滑到底部时自动加载下一页
+- 支持加载状态和结束状态提示
+
+## 🎨 UI组件库
+
+### 基础组件
+- `LoadingState`: 统一的加载状态组件
+- `ErrorState`: 统一的错误状态组件  
+- `EmptyState`: 统一的空状态组件
+
+### 业务组件
+- `CitySelector`: 城市选择下拉框
+- `DateRangePicker`: 日期范围选择器
+- `PriceStarFilter`: 价格星级筛选面板
+- `TagSelector`: 标签选择器
+- `HotelCard`: 酒店信息卡片
+
+## 🔧 配置说明
+
+### 环境变量
+在`.env`文件中配置：
+```bash
+API_BASE_URL=http://localhost:3000
+DEFAULT_CITY=上海
+```
+
+### 路由配置
+使用Expo Router的文件系统路由：
+- `app/index.tsx` → `/`
+- `app/list.tsx` → `/list`
+- `app/hotels/[id].tsx` → `/hotels/123`
+
+## 📊 性能优化
+
+### 已实现的优化
+- ✅ 虚拟列表渲染（FlatList）
+- ✅ 图片懒加载
+- ✅ 组件记忆化（useMemo, useCallback）
+- ✅ 防抖搜索
+- ✅ 分页加载
+
+### 待优化项
+- [ ] 图片压缩和CDN加速
+- [ ] 数据缓存策略优化
+- [ ] Bundle拆分和懒加载
+
+## 🐛 常见问题
+
+### 开发环境问题
+1. **Metro打包失败**: 清除缓存 `npx react-native start --reset-cache`
+2. **TypeScript类型错误**: 检查接口定义是否完整
+3. **样式不生效**: 确认NativeWind配置正确
+
+### 运行时问题
+1. **API请求失败**: 检查后端服务是否启动
+2. **数据不更新**: 检查筛选条件和分页状态
+3. **组件渲染异常**: 查看控制台错误信息
+
+## 🤝 贡献指南
+
+### 开发流程
+1. Fork项目仓库
+2. 创建功能分支 `git checkout -b feature/new-feature`
+3. 提交更改 `git commit -am 'Add new feature'`
+4. 推送到分支 `git push origin feature/new-feature`
+5. 创建Pull Request
+
+### 代码审查要点
+- [ ] TypeScript类型是否完整
+- [ ] 组件是否可复用
+- [ ] 是否有必要的注释
+- [ ] 是否符合项目规范
+- [ ] 测试是否通过
+
+## 📄 许可证
+
+MIT License
+
+## 📞 联系方式
+
+如有问题，请提交Issue或联系项目维护者。

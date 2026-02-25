@@ -47,7 +47,7 @@ const TagSelector = ({ tags, selectedTags, onToggleTag }: TagSelectorProps) => {
   }
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2">
       <View className="flex-row gap-2">
         {displayTags.map((item, index) => (
           <TouchableOpacity

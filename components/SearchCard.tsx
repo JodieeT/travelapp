@@ -172,9 +172,9 @@ const SearchCard = () => {
   }, []);
 
   return (
-    <View className="mx-0 mt-0 p-4 bg-white rounded-2xl shadow-lg">
+    <View className="mx-4 mt-4 p-5 bg-white rounded-2xl shadow-lg">
       {/* 1️⃣ 城市 + 搜索 */}
-      <View className="flex-row items-center justify-between mb-3">
+      <View className="flex-row items-center justify-between mb-4">
         <CitySelector 
           currentCity={currentCity}
           onCityChange={setCurrentCity}
@@ -190,23 +190,28 @@ const SearchCard = () => {
       </View>
       
       {/* 2️⃣ 日期选择器 */}
-      <DateRangePicker
-        startDate={checkInDate}
-        endDate={checkOutDate}
-        onDateChange={handleDateChange}
-        className="mb-3"
-      />
+      <View className="mb-4">
+        <DateRangePicker
+          startDate={checkInDate}
+          endDate={checkOutDate}
+          onDateChange={handleDateChange}
+        />
+      </View>
       
       {/* 3️⃣ 价格/星级筛选 */}
-      <TouchableOpacity 
-        className="mb-3 p-3 bg-gray-50 rounded-lg"
-        onPress={openPriceStarFilter}
-      >
-        <Text className="text-gray-700">{getPriceStarDisplayText()}</Text>
-      </TouchableOpacity>
+      <View className="mb-4">
+        <TouchableOpacity 
+          className="p-3 bg-gray-50 rounded-lg"
+          onPress={openPriceStarFilter}
+        >
+          <Text className="text-gray-700">{getPriceStarDisplayText()}</Text>
+        </TouchableOpacity>
+      </View>
       
       {/* 4️⃣ 标签 */}
-      <TagSelector selectedTags={selectedTags} onToggleTag={toggleTag} />
+      <View className="mb-4">
+        <TagSelector selectedTags={selectedTags} onToggleTag={toggleTag} />
+      </View>
       
       {/* 5️⃣ 查询按钮 - 传递筛选参数 */}
       <Link 
@@ -216,7 +221,7 @@ const SearchCard = () => {
         }} 
         asChild
       >
-        <TouchableOpacity className="bg-blue-500 py-3 rounded-xl items-center mt-4">
+        <TouchableOpacity className="bg-blue-500 py-3 rounded-xl items-center mt-2">
           <Text className="text-white font-semibold text-base">查询</Text>
         </TouchableOpacity>
       </Link>
