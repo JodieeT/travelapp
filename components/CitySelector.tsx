@@ -3,11 +3,12 @@ import React, { useState, useEffect } from 'react'
 import * as Location from 'expo-location'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { 
-  CITIES, 
   DEFAULT_CITY, 
   LOCATION_CACHE_KEY, 
   LOCATION_TIMEOUT
 } from '../constants/data'
+import { useCities } from '../constants/data'
+import { cityDataService } from '../constants/data'
 
 interface City {
   id: string;
@@ -27,6 +28,21 @@ const CitySelector: React.FC<CitySelectorProps> = ({
 }) => {
   const [isCitySelectorVisible, setIsCitySelectorVisible] = useState<boolean>(false);
   const [locationPermission, setLocationPermission] = useState<boolean>(false);
+  const { data: cities = [], loading, error } = useCities();
+
+  // 初始化城市列表
+  useEffect(() => {
+    const initializeCities = async () => {
+      try {
+        const cityList = await cityDataService.getCities();
+        console.log('Initialized cities:', cityList);
+      } catch (err) {
+        console.error('Failed to initialize cities:', err);
+      }
+    };
+    
+    initializeCities();
+  }, []);
 
   // 检查并请求位置权限
   const checkLocationPermission = async () => {
@@ -148,7 +164,7 @@ const CitySelector: React.FC<CitySelectorProps> = ({
             
             <ScrollView>
               <FlatList
-                data={CITIES}
+                data={(cities || []).map((city, index) => ({ id: index.toString(), name: city }))}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                   <TouchableOpacity

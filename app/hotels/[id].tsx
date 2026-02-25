@@ -83,7 +83,7 @@ export default function HotelDetail() {
           {hotel.address}
         </Text>
 
-        {hotel.tags && hotel.tags.length > 0 && (
+        {hotel?.tags && hotel.tags.length > 0 && (
           <View className="flex-row flex-wrap mt-3">
             {hotel.tags.map((tag: string, i: number) => (
               <Text

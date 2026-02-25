@@ -5,6 +5,64 @@ export const BACKEND_CONFIG = {
     }
 }
 
+// 图片URL处理函数
+export const getFullImageUrl = (imagePath: string): string => {
+  if (!imagePath) return '';
+  
+  // 如果已经是完整URL，直接返回
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  
+  // 如果是相对路径，转换为完整URL
+  if (imagePath.startsWith('/')) {
+    return `${BACKEND_CONFIG.BASE_URL}${imagePath}`;
+  }
+  
+  // 其他情况返回原路径
+  return imagePath;
+};
+
+// 城市数据获取函数
+export const fetchCities = async(): Promise<string[]> => {
+    const endpoint = `${BACKEND_CONFIG.BASE_URL}/api/cities`;
+    console.log('Fetching cities from:', endpoint);
+    const response = await fetch(endpoint,{
+        method: 'GET',
+        headers: BACKEND_CONFIG.headers,
+    });
+
+    console.log('Response status:', response.status);
+    if(!response.ok){
+        throw new Error(`Failed to fetch cities: ${response.statusText}`);
+    }
+
+    const rawData = await response.json();
+    console.log('Raw cities data received:', rawData);
+    
+    return rawData;
+}
+
+// 标签数据获取函数
+export const fetchTags = async(): Promise<string[]> => {
+    const endpoint = `${BACKEND_CONFIG.BASE_URL}/api/tags`;
+    console.log('Fetching tags from:', endpoint);
+    const response = await fetch(endpoint,{
+        method: 'GET',
+        headers: BACKEND_CONFIG.headers,
+    });
+
+    console.log('Response status:', response.status);
+    if(!response.ok){
+        throw new Error(`Failed to fetch tags: ${response.statusText}`);
+    }
+
+    const rawData = await response.json();
+    console.log('Raw tags data received:', rawData);
+    
+    return rawData;
+}
+
 // 为banner专门的数据转换函数
 const transformBannerData = (hotels: any[]): HotelBanner[] => {
   return hotels.map(hotel => ({
@@ -13,9 +71,10 @@ const transformBannerData = (hotels: any[]): HotelBanner[] => {
     name_en: hotel.name_en,
     city: hotel.city,
     star_level: hotel.star_level,
-    images: typeof hotel.images === 'string' 
+    images: (typeof hotel.images === 'string' 
       ? JSON.parse(hotel.images) 
-      : hotel.images
+      : hotel.images || []
+    ).map(getFullImageUrl)
   }));
 };
 
@@ -29,9 +88,10 @@ const transformHotelData = (hotels: any[]): Hotel[] => {
     address: hotel.address,
     star_level: hotel.star_level,
     open_date: hotel.open_date,
-    images: typeof hotel.images === 'string' 
+    images: (typeof hotel.images === 'string' 
       ? JSON.parse(hotel.images) 
-      : hotel.images,
+      : hotel.images || []
+    ).map(getFullImageUrl),
     tags: typeof hotel.tags === 'string'
       ? JSON.parse(hotel.tags)
       : hotel.tags,
@@ -45,9 +105,10 @@ const transformHotelData = (hotels: any[]): Hotel[] => {
 // 酒店详情数据转换函数
 const transformHotelDetailData = (hotelData: any): HotelDetail => {
   // 处理图片数组
-  const images = typeof hotelData.images === 'string' 
+  const images = (typeof hotelData.images === 'string' 
     ? JSON.parse(hotelData.images) 
-    : hotelData.images || [];
+    : hotelData.images || []
+  ).map(getFullImageUrl);
   
   // 处理设施数组
   const facilities = typeof hotelData.facilities === 'string'
@@ -57,8 +118,19 @@ const transformHotelDetailData = (hotelData: any): HotelDetail => {
   // 处理标签 - 可能是字符串或数组
   let tags: string[] = [];
   if (typeof hotelData.tags === 'string') {
-    // 如果是字符串格式的标签
-    tags = [hotelData.tags];
+    try {
+      // 尝试解析字符串化的JSON数组
+      const parsedTags = JSON.parse(hotelData.tags);
+      if (Array.isArray(parsedTags)) {
+        tags = parsedTags;
+      } else {
+        // 如果解析后不是数组，将其作为单个标签
+        tags = [hotelData.tags];
+      }
+    } catch (e) {
+      // 解析失败时，将原字符串作为单个标签
+      tags = [hotelData.tags];
+    }
   } else if (Array.isArray(hotelData.tags)) {
     tags = hotelData.tags;
   }

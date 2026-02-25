@@ -1,15 +1,92 @@
-// 城市数据
-export const CITIES = [
-  { id: '1', name: '北京' },
-  { id: '2', name: '上海' },
-  { id: '3', name: '广州' },
-  { id: '4', name: '深圳' },
-  { id: '5', name: '杭州' },
-  { id: '6', name: '成都' },
-  { id: '7', name: '南京' },
-  { id: '8', name: '武汉' },
-  { id: '9', name: '西安' },
-  { id: '10', name: '重庆' },
+import { fetchCities, fetchTags, getFullImageUrl } from '../services/api';
+import useFetch from '../services/useFetch';
+
+// 城市数据Hook
+export const useCities = () => {
+  return useFetch<string[]>(fetchCities, true);
+};
+
+// 标签数据Hook
+export const useTags = () => {
+  return useFetch<string[]>(fetchTags, true);
+};
+
+// 城市数据服务类
+class CityDataService {
+  private cities: string[] | null = null;
+  private loadingPromise: Promise<string[]> | null = null;
+
+  public async getCities(): Promise<string[]> {
+    if (this.cities) {
+      return this.cities;
+    }
+    
+    if (this.loadingPromise) {
+      return this.loadingPromise;
+    }
+    
+    this.loadingPromise = this.loadCities();
+    this.cities = await this.loadingPromise;
+    this.loadingPromise = null;
+    return this.cities;
+  }
+
+  private async loadCities(): Promise<string[]> {
+    try {
+      const data = await fetchCities();
+      return data;
+    } catch (error) {
+      console.error('Failed to load cities:', error);
+      // 返回默认城市数据作为后备
+      return ['北京', '上海', '广州', '深圳', '杭州', '成都'];
+    }
+  }
+}
+
+// 标签数据服务类
+class TagDataService {
+  private tags: string[] | null = null;
+  private loadingPromise: Promise<string[]> | null = null;
+
+  public async getTags(): Promise<string[]> {
+    if (this.tags) {
+      return this.tags;
+    }
+    
+    if (this.loadingPromise) {
+      return this.loadingPromise;
+    }
+    
+    this.loadingPromise = this.loadTags();
+    this.tags = await this.loadingPromise;
+    this.loadingPromise = null;
+    return this.tags;
+  }
+
+  private async loadTags(): Promise<string[]> {
+    try {
+      const data = await fetchTags();
+      return data;
+    } catch (error) {
+      console.error('Failed to load tags:', error);
+      // 返回默认标签数据作为后备
+      return ["免费停车", "亲子", "机场附近", "宠物", "地铁附近", "景点附近"];
+    }
+  }
+}
+
+// 导出服务实例
+export const cityDataService = new CityDataService();
+export const tagDataService = new TagDataService();
+
+// 酒店标签选项 - 静态后备数据
+export const HOTEL_TAGS = [
+  "免费停车", 
+  "亲子", 
+  "机场附近",
+  "宠物", 
+  "地铁附近", 
+  "景点附近"
 ];
 
 // 酒店星级选项
@@ -28,16 +105,6 @@ export const PRICE_OPTIONS = [
   { id: '3', label: '¥100-300', value: '100-300' },
   { id: '4', label: '¥300-500', value: '300-500' },
   { id: '5', label: '¥500+', value: '500+' },
-];
-
-// 酒店标签选项
-export const HOTEL_TAGS = [
-  "免费停车", 
-  "亲子", 
-  "机场附近",
-  "宠物", 
-  "地铁附近", 
-  "景点附近"
 ];
 
 // 默认城市

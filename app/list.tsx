@@ -9,7 +9,6 @@ import { use, useEffect, useState } from "react";
 import CitySelector from "@/components/CitySelector";
 import DateRangePicker from "@/components/DateRangePicker";
 import PriceStarFilter from "@/components/PriceStarFilter"; // 添加价格星级筛选组件导入
-import { HOTEL_TAGS } from "@/constants/data";
 import TagSelector from "@/components/TagSelector";
 
 export default function ListPage() {
@@ -301,15 +300,11 @@ export default function ListPage() {
                 <Text className="text-gray-700">{getPriceStarDisplayText()}</Text>
         </TouchableOpacity>
         <TagSelector 
-          tags={HOTEL_TAGS} 
           selectedTags={searchTags} 
           onToggleTag={handleTagToggle} 
         />
-        <Text className="text-gray-600 text-sm" numberOfLines={1}>
-          {getFilterSummary() || '全部酒店'}
-        </Text>
         {hotelList && (
-          <Text className="text-gray-400 text-xs mt-1">
+          <Text className="text-gray-600 text-sm" numberOfLines={1}>
             共找到 {hotelList.list?.length || 0} 家酒店
           </Text>
         )}

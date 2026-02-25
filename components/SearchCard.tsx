@@ -206,7 +206,7 @@ const SearchCard = () => {
       </TouchableOpacity>
       
       {/* 4️⃣ 标签 */}
-      <TagSelector tags={HOTEL_TAGS} selectedTags={selectedTags} onToggleTag={toggleTag} />
+      <TagSelector selectedTags={selectedTags} onToggleTag={toggleTag} />
       
       {/* 5️⃣ 查询按钮 - 传递筛选参数 */}
       <Link 
