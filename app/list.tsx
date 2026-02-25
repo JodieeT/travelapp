@@ -25,7 +25,6 @@ export default function ListPage() {
   const [searchCheckInDate, setSearchCheckInDate] = useState('');
   const [searchCheckOutDate, setSearchCheckOutDate] = useState('');
   const [searchTags, setSearchTags] = useState<string[]>([]);
-  const [shouldFetch, setShouldFetch] = useState(false);
   
   // 添加分页相关状态
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,7 +54,6 @@ export default function ListPage() {
       starRating: starLevel ? starLevel.toString() : '',
       priceRange: ''
     });
-    setShouldFetch(true);
     // 重置分页状态
     setCurrentPage(1);
     setHasMore(true);
@@ -76,7 +74,8 @@ export default function ListPage() {
 
   // 处理上滑加载更多
   const loadMoreHotels = async () => {
-    if (!hasMore || isLoadingMore || !shouldFetch) return;
+    // 添加额外的保护条件：确保不是初始加载且有数据
+    if (!hasMore || isLoadingMore || allHotels.length === 0) return;
     
     setIsLoadingMore(true);
     const nextPage = currentPage + 1;
@@ -114,7 +113,7 @@ export default function ListPage() {
 
   // 直接使用参数调用API，包含日期参数
   const {data: hotelList, loading, error, refetch} = useFetch(() => 
-    shouldFetch ? fetchHotels(
+    fetchHotels(
       searchCity,
       searchKeyword,
       searchStarLevel,
@@ -125,7 +124,9 @@ export default function ListPage() {
       searchCheckOutDate,
       1, // 初始页码
       10 // 每页数量
-    ) : Promise.resolve(null)
+    ), !!searchCity || !!searchKeyword || searchStarLevel !== undefined || 
+       searchMinPrice !== undefined || searchMaxPrice !== undefined || 
+       searchTags.length > 0 || !!searchCheckInDate || !!searchCheckOutDate
   );
 
   // 当初始数据加载完成时，更新allHotels状态
@@ -136,11 +137,15 @@ export default function ListPage() {
     }
   }, [hotelList]);
 
+  // 优化搜索参数变化时的重新获取逻辑
   useEffect(() => {
-    const timeoutId = setTimeout( async () => {
-      await refetch();
-    }, 500);
-    return () => clearTimeout(timeoutId);  
+    // 只有当已经有数据且参数真正发生变化时才重新获取
+    if (hotelList) {
+      const timeoutId = setTimeout(async () => {
+        await refetch();
+      }, 1000); // 增加延迟到1秒
+      return () => clearTimeout(timeoutId);
+    }
   }, [searchCity,
       searchKeyword,
       searchStarLevel,
@@ -329,7 +334,7 @@ export default function ListPage() {
           ListEmptyComponent={renderEmptyState}
           showsVerticalScrollIndicator={false}
           onEndReached={loadMoreHotels}
-          onEndReachedThreshold={0.1} // 距离底部10%时触发加载
+          onEndReachedThreshold={0.5} // 增加阈值到50%，减少误触发
           ListFooterComponent={
             isLoadingMore ? (
               <View className="py-4 items-center">
