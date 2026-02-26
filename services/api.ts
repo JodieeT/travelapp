@@ -1,5 +1,5 @@
 export const BACKEND_CONFIG = {
-    BASE_URL: 'http://localhost:3000',
+    BASE_URL: 'http://172.20.10.8:3000',
     headers:{
         accept: 'application/json',
     }

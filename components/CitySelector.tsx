@@ -88,7 +88,11 @@ const CitySelector: React.FC<CitySelectorProps> = ({
 
       if (reverseGeocode.length > 0) {
         const city = reverseGeocode[0].city || reverseGeocode[0].region || '未知城市';
-        onCityChange(city);
+        if(city.endsWith('市')) {
+          onCityChange(city.slice(0, -1)); // 去掉末尾的“市”字
+        }else{
+          onCityChange(city);
+        }
         
         // 缓存定位结果
         await AsyncStorage.setItem(LOCATION_CACHE_KEY, city);
@@ -162,30 +166,32 @@ const CitySelector: React.FC<CitySelectorProps> = ({
               </TouchableOpacity>
             </View>
             
-            <ScrollView>
-              <FlatList
-                data={(cities || []).map((city, index) => ({ id: index.toString(), name: city }))}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    onPress={() => selectCity(item.name)}
-                    className={`py-3 px-4 ${
-                      currentCity === item.name 
-                        ? 'bg-blue-100 border-l-4 border-blue-500' 
-                        : 'border-b border-gray-100'
-                    }`}
-                  >
-                    <Text className={`${
-                      currentCity === item.name 
-                        ? 'text-blue-600 font-medium' 
-                        : 'text-gray-700'
-                    }`}>
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
-            </ScrollView>
+            {/* 移除外层 ScrollView，直接使用 FlatList */}
+            <FlatList
+              data={(cities || []).map((city, index) => ({ id: index.toString(), name: city }))}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => selectCity(item.name)}
+                  className={`py-3 px-4 ${
+                    currentCity === item.name 
+                      ? 'bg-blue-100 border-l-4 border-blue-500' 
+                      : 'border-b border-gray-100'
+                  }`}
+                >
+                  <Text className={`${
+                    currentCity === item.name 
+                      ? 'text-blue-600 font-medium' 
+                      : 'text-gray-700'
+                  }`}>
+                    {item.name}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              // 添加必要的 FlatList 属性
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            />
           </View>
         </View>
       </Modal>

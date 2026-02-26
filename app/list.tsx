@@ -280,7 +280,7 @@ export default function ListPage() {
     <View className="flex-1 bg-gray-100">
       
       {/* 筛选摘要显示 */}
-      <View className="bg-white px-4 py-3 border-b border-gray-200">
+      <View className="bg-white px-4 py-3 border-b border-gray-200 my-3">
         <CitySelector 
           currentCity={searchCity}
           onCityChange={setSearchCity}
@@ -290,7 +290,7 @@ export default function ListPage() {
                 placeholderTextColor="grey"
                 value={searchKeyword}
                 onChangeText={setSearchKeyword}
-                className="flex-1 ml-3 bg-gray-100 px-3 py-2 rounded-lg"
+                className="flex-1 ml-0 bg-gray-100 px-3 py-5 my-2 rounded-lg"
         />
         <DateRangePicker
         startDate={convertStringToDate(searchCheckInDate)}

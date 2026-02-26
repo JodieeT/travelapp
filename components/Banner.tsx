@@ -30,7 +30,7 @@ export default function Banner({ hotels }: Props) {
         <View className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-none" />
         
         {/* 顶部信息区域 */}
-        <View className="absolute top-4 left-4 right-4">
+        <View className="absolute top-10 left-4 right-4">
           <View className="bg-white/20 backdrop-blur-sm rounded-xl p-3">
             <Text className="text-white font-bold text-xl" numberOfLines={1}>
               {hotel.name_cn}
