@@ -1,27 +1,41 @@
-# React + Vite
+# 易宿酒店预订平台
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+智慧出行酒店预订平台是一个面向现代旅游出行场景的综合服务体系，旨在为酒店商家与终端消费者之间搭建高效、便捷的信息交互桥梁。
 
-Currently, two official plugins are available:
+本项目为 **管理酒店信息系统（PC 站点）**，包含商户端和管理员端的酒店信息管理功能。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 项目结构
 
-## React Compiler
+```
+travelapp/
+├── backend/           # Node.js + Express + SQLite 后端服务
+│   ├── src/
+│   │   ├── controllers/   # 控制器
+│   │   ├── models/        # 数据模型
+│   │   ├── routes/        # 路由
+│   │   ├── middlewares/   # 中间件
+│   │   └── services/      # 服务
+│   └── database.sqlite    # SQLite 数据库
+├── frontend/          # PC 管理端 (React + Vite)
+│   ├── src/
+│   │   ├── components/    # 组件
+│   │   ├── pages/         # 页面
+│   │   ├── api/           # API
+│   │   ├── hooks/         # 自定义 Hooks
+│   │   └── context/       # 上下文
+│   └── ...
+└── docs/              # 文档
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 功能一览
 
-## Expanding the ESLint configuration
+- **用户登录/注册**：支持商户、管理员两种角色
+- **酒店信息录入/编辑**：商户录入、编辑、保存酒店信息
+- **酒店信息审核/发布/下线**：管理员审核通过/不通过、发布、下线（可恢复）
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 快速开始
 
----
-
-## 后端使用方法
-
-后端基于 Node.js + Express + SQLite，位于 `backend/` 目录。
-
-### 安装与启动
+### 1. 启动后端
 
 ```bash
 cd backend
@@ -29,64 +43,43 @@ npm install
 npm run dev
 ```
 
-或使用 `npm start` 直接运行（无热重载）。服务默认运行在 **http://localhost:3000**。
+后端服务运行在 **http://localhost:3000**
 
-### 环境变量（可选）
+### 2. 启动 PC 管理端
 
-在 `backend/` 下新建 `.env`，可配置：
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-- `JWT_SECRET`：JWT 密钥（不设则使用默认占位符，仅适合本地开发）
+管理端运行在 **http://localhost:5173**
 
-### API 基础地址
+## API 接口
 
-| 类型     | 基础路径           | 说明           |
-|----------|--------------------|----------------|
-| 公开接口 | `GET /api/...`     | 无需登录       |
-| 认证     | `POST /api/auth/...` | 注册、登录     |
-| 商户     | `/api/merchant/...`  | 需登录，角色 merchant |
-| 管理员   | `/api/admin/...`     | 需登录，角色 admin   |
+### 基础路径
 
-### 主要接口一览
+| 类型 | 基础路径 | 说明 |
+|------|----------|------|
+| 公开接口 | `GET /api/...` | 无需登录 |
+| 认证 | `POST /api/auth/...` | 注册、登录 |
+| 商户 | `/api/merchant/...` | 需登录，角色 merchant |
+| 管理员 | `/api/admin/...` | 需登录，角色 admin |
 
-**公开（用户端 / 移动端）**
+### 认证接口
 
-- `GET /api/banners` — 首页 Banner 列表
-- `GET /api/cities` — 获取所有可用城市列表（用于下拉选择）
-- `GET /api/tags` — 获取所有可用标签列表（用于快捷标签）
-- `GET /api/hotels` — 酒店列表（分页、筛选）
-  - 查询参数：
-    - `city` — 城市名称（模糊匹配）
-    - `keyword` — 关键字搜索（匹配酒店名、英文名、地址）
-    - `star_level` — 星级（3/4/5）
-    - `minPrice` / `maxPrice` — 价格区间
-    - `tags` — 标签筛选（单个：`"亲子"`，多个：`"亲子,豪华"`）
-    - `page` — 页码（默认1）
-    - `limit` — 每页数量（默认20，最大100）
-  - 响应：`{ total: 总数, list: [酒店数组] }`
-  - 说明：`images`、`tags`、`facilities` 字段自动解析为数组
-- `GET /api/hotels/:id` — 酒店详情
-  - 查询参数（可选）：
-    - `check_in` — 入住日期（格式：`YYYY-MM-DD`，如 `2025-03-01`）
-    - `check_out` — 离店日期（格式：`YYYY-MM-DD`，如 `2025-03-05`）
-    - `nights` — 间夜数（如果提供，会计算每个房型的总价）
-  - 响应：酒店详细信息，包含房型列表（按价格从低到高排序）
-  - 说明：如果提供了日期参数，每个房型会包含 `total_price`（总价 = `base_price * nights`）
-- `GET /api/prices/stream` — 价格实时更新流（SSE）
-
-**认证**
-
-- `POST /api/auth/register` — 注册，body: `{ username, password, role? }`，role 可选 `merchant` / `admin`
+- `POST /api/auth/register` — 注册，body: `{ username, password, role }`，role 为 `merchant` 或 `admin`
 - `POST /api/auth/login` — 登录，body: `{ username, password }`，返回 `token`、`user`
 
-**商户**
+### 商户接口（需 Header: `Authorization: Bearer <token>`）
 
-- `GET /api/merchant/hotels` — 当前商户的酒店列表（需 Header: `Authorization: Bearer <token>`）
+- `GET /api/merchant/hotels` — 当前商户的酒店列表
 - `GET /api/merchant/hotels/:id` — 单店详情
 - `POST /api/merchant/hotels` — 创建酒店（草稿），可带 `rooms: [{ type_name, base_price }]`
 - `PUT /api/merchant/hotels/:id` — 编辑酒店（仅 draft/rejected）
 - `POST /api/merchant/hotels/:id/submit` — 提交审核
 
-**管理员**
+### 管理员接口
 
 - `GET /api/admin/hotels?status=&page=&limit=` — 酒店列表（按状态筛选）
 - `POST /api/admin/hotels/:id/approve` — 审核通过
@@ -96,79 +89,40 @@ npm run dev
 
 ### 测试接口
 
-在**已启动后端**的前提下，另开终端执行：
+```bash
+cd backend
+npm run test:api
+```
+
+## 技术亮点
+
+- **角色权限**：JWT 认证 + 角色中间件实现商户/管理员权限控制
+- **状态管理**：完整的审核流程（草稿→待审核→已通过/已拒绝→已下线）
+- **路由保护**：ProtectedRoute 组件根据用户角色控制页面访问权限，未登录自动跳转登录页
+- **SSE 实时价格更新**：使用 Server-Sent Events 实现价格实时推送，后端维护长连接并广播价格变动
+- **草稿自动保存**：商户录入表单时自动保存草稿到 localStorage，意外关闭可恢复
+- **批量审核操作**：管理员支持批量通过/驳回酒店，提高审核效率
+- **Banner 管理**：可设置酒店为首页展示 Banner，支持排序
+- **分页查询**：酒店列表支持分页加载，避免大数据量渲染
+- **图片上传**：支持本地上传图片到服务器
+- **完整数据维度**：包含酒店名称、地址、星级、房型、价格、开业时间、周边交通、热门景点等字段
+
+## 开发指南
+
+### 数据库操作
 
 ```bash
 cd backend
-npm run test:api      # 管理端接口（登录、商户、管理员）
-npm run test:mobile   # 移动端接口（banners、cities、tags、hotels 列表/详情）
+sqlite3 database.sqlite
 ```
 
-会依次请求上述主要接口并打印结果，用于快速验证。
+### 测试接口
 
-### 数据库
+```bash
+cd backend
+npm run test:api      # 测试管理端接口
+```
 
-- 使用 **SQLite**，库文件路径：`backend/database.sqlite`（相对于在 `backend/` 下启动时的当前目录）。
-- 查看数据：在终端进入 `backend/` 后执行 `sqlite3 database.sqlite`，例如：
-  - `.tables` — 查看表（Users、Hotels、Rooms）
-  - `SELECT * FROM Hotels;` — 查询酒店（注意语句末尾加分号 `;`）
-  - `.quit` — 退出
+## License
 
-### 数据库结构
-
-共三张表：**Users**（用户）、**Hotels**（酒店）、**Rooms**（房型）。关系：用户（商户）一对多酒店，酒店一对多房型。
-
-| 表名 | 说明 |
-|------|------|
-| Users | 账号（商户 / 管理员），用于登录与权限 |
-| Hotels | 酒店信息及审核状态 |
-| Rooms | 房型及价格，归属某家酒店 |
-
-**Users**
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | INTEGER | 主键（自增） |
-| username | STRING | 登录名，唯一 |
-| password_hash | STRING | 密码哈希 |
-| role | ENUM | `merchant` / `admin` |
-| createdAt | DATE | 创建时间 |
-| updatedAt | DATE | 更新时间 |
-
-**Hotels**
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | INTEGER | 主键（自增） |
-| merchant_id | INTEGER | 所属商户，外键 → Users.id |
-| name_cn | STRING | 酒店中文名 |
-| name_en | STRING | 酒店英文名 |
-| city | STRING | 城市 |
-| address | STRING | 地址 |
-| star_level | INTEGER | 星级 |
-| open_date | DATE | 开业日期 |
-| status | ENUM | `draft` 草稿 / `pending` 待审核 / `approved` 已通过 / `rejected` 已拒绝 / `offline` 已下线 |
-| reject_reason | STRING | 审核不通过原因（仅 status=rejected 时有值） |
-| images | TEXT | JSON 数组字符串，图片 URL 列表 |
-| tags | TEXT | JSON 数组字符串，标签（如亲子、豪华等） |
-| facilities | TEXT | JSON 数组字符串，设施列表 |
-| is_banner | BOOLEAN | 是否作为首页 Banner |
-| banner_sort | INTEGER | Banner 排序，越小越靠前 |
-| createdAt | DATE | 创建时间 |
-| updatedAt | DATE | 更新时间 |
-
-**Rooms**
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | INTEGER | 主键（自增） |
-| hotel_id | INTEGER | 所属酒店，外键 → Hotels.id |
-| type_name | STRING | 房型名称（如大床房、双床房） |
-| base_price | FLOAT | 基础价格 |
-| createdAt | DATE | 创建时间 |
-| updatedAt | DATE | 更新时间 |
-
-**表关系**
-
-- `Users.id` ← `Hotels.merchant_id`（一个商户对应多家酒店）
-- `Hotels.id` ← `Rooms.hotel_id`（一家酒店对应多种房型）
+MIT
