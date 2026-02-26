@@ -80,9 +80,10 @@ exports.listHotels = async (req, res) => {
                 rooms = rooms.filter(r => r.base_price >= Number(minPrice));
             }
             const minPriceVal = rooms.length ? Math.min(...rooms.map(r => r.base_price)) : null;
+            if (minPriceVal === null) return null;
             return { ...j, Rooms: rooms, minPrice: minPriceVal };
-        });
-        return res.json({ total: count, list });
+        }).filter(h => h !== null);
+        return res.json({ total: list.length, list });
     } catch (e) {
         return res.status(500).json({ message: 'server error' });
     }
