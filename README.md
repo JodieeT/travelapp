@@ -94,18 +94,69 @@ cd backend
 npm run test:api
 ```
 
-## 技术亮点
+## 数据库
 
-- **角色权限**：JWT 认证 + 角色中间件实现商户/管理员权限控制
-- **状态管理**：完整的审核流程（草稿→待审核→已通过/已拒绝→已下线）
-- **路由保护**：ProtectedRoute 组件根据用户角色控制页面访问权限，未登录自动跳转登录页
-- **SSE 实时价格更新**：使用 Server-Sent Events 实现价格实时推送，后端维护长连接并广播价格变动
-- **草稿自动保存**：商户录入表单时自动保存草稿到 localStorage，意外关闭可恢复
-- **批量审核操作**：管理员支持批量通过/驳回酒店，提高审核效率
-- **Banner 管理**：可设置酒店为首页展示 Banner，支持排序
-- **分页查询**：酒店列表支持分页加载，避免大数据量渲染
-- **图片上传**：支持本地上传图片到服务器
-- **完整数据维度**：包含酒店名称、地址、星级、房型、价格、开业时间、周边交通、热门景点等字段
+- 使用 **SQLite**，库文件路径：`backend/database.sqlite`
+- 查看数据：在终端进入 `backend/` 后执行 `sqlite3 database.sqlite`
+
+### 数据库结构
+
+共三张表：**Users**（用户）、**Hotels**（酒店）、**Rooms**（房型）。关系：用户（商户）一对多酒店，酒店一对多房型。
+
+| 表名 | 说明 |
+|------|------|
+| Users | 账号（商户 / 管理员），用于登录与权限 |
+| Hotels | 酒店信息及审核状态 |
+| Rooms | 房型及价格，归属某家酒店 |
+
+**Users**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | INTEGER | 主键（自增） |
+| username | STRING | 登录名，唯一 |
+| password_hash | STRING | 密码哈希 |
+| role | ENUM | `merchant` / `admin` |
+| createdAt | DATE | 创建时间 |
+| updatedAt | DATE | 更新时间 |
+
+**Hotels**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | INTEGER | 主键（自增） |
+| merchant_id | INTEGER | 所属商户，外键 → Users.id |
+| name_cn | STRING | 酒店中文名 |
+| name_en | STRING | 酒店英文名 |
+| city | STRING | 城市 |
+| address | STRING | 地址 |
+| star_level | INTEGER | 星级 |
+| open_date | DATE | 开业日期 |
+| status | ENUM | `draft` / `pending` / `approved` / `rejected` / `offline` |
+| reject_reason | STRING | 审核不通过原因 |
+| images | TEXT | JSON 数组字符串，图片 URL 列表 |
+| tags | TEXT | JSON 数组字符串，标签 |
+| facilities | TEXT | JSON 数组字符串，设施列表 |
+| is_banner | BOOLEAN | 是否作为首页 Banner |
+| banner_sort | INTEGER | Banner 排序 |
+| createdAt | DATE | 创建时间 |
+| updatedAt | DATE | 更新时间 |
+
+**Rooms**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | INTEGER | 主键（自增） |
+| hotel_id | INTEGER | 所属酒店，外键 → Hotels.id |
+| type_name | STRING | 房型名称 |
+| base_price | FLOAT | 基础价格 |
+| createdAt | DATE | 创建时间 |
+| updatedAt | DATE | 更新时间 |
+
+**表关系**
+
+- `Users.id` ← `Hotels.merchant_id`（一个商户对应多家酒店）
+- `Hotels.id` ← `Rooms.hotel_id`（一家酒店对应多种房型）
 
 ## 开发指南
 
