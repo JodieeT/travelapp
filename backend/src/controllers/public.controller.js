@@ -66,7 +66,6 @@ exports.listHotels = async (req, res) => {
 
         const list = rows.map(h => {
             const j = h.toJSON();
-            // 解析JSON字段
             try {
                 j.images = typeof j.images === 'string' ? JSON.parse(j.images) : (j.images || []);
                 j.tags = typeof j.tags === 'string' ? JSON.parse(j.tags) : (j.tags || []);
@@ -76,7 +75,10 @@ exports.listHotels = async (req, res) => {
                 j.tags = [];
                 j.facilities = [];
             }
-            const rooms = (j.Rooms || []).sort((a, b) => (a.base_price || 0) - (b.base_price || 0));
+            let rooms = (j.Rooms || []).sort((a, b) => (a.base_price || 0) - (b.base_price || 0));
+            if (minPrice != null && minPrice !== '') {
+                rooms = rooms.filter(r => r.base_price >= Number(minPrice));
+            }
             const minPriceVal = rooms.length ? Math.min(...rooms.map(r => r.base_price)) : null;
             return { ...j, Rooms: rooms, minPrice: minPriceVal };
         });
