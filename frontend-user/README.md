@@ -1,142 +1,292 @@
-# Welcome to your Expo app 👋
+# 易宿酒店预订平台 - 移动端用户应用
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+智慧出行酒店预订平台的移动端用户应用，为终端消费者提供便捷的酒店搜索、筛选和预订服务。
 
-## Get started
+## 项目结构
 
-1. Install dependencies
+```
+frontend-user/
+├── app/               # 应用页面路由
+│   ├── _layout.tsx    # 应用布局配置
+│   ├── index.tsx      # 首页（Banner展示）
+│   ├── list.tsx       # 酒店列表页
+│   └── hotels/        # 酒店详情页
+├── components/        # 可复用组件
+│   ├── Banner.tsx     # 首页Banner轮播
+│   ├── SearchCard.tsx # 搜索卡片组件
+│   ├── HotelCard.tsx  # 酒店卡片组件
+│   ├── CitySelector.tsx # 城市选择器
+│   └── ...            # 其他UI组件
+├── constants/         # 静态数据常量
+│   └── data.ts        # 城市、标签、价格等配置
+├── services/          # 业务服务
+│   ├── api.ts         # 后端API接口调用
+│   └── useFetch.ts    # 自定义数据获取Hook
+├── interfaces/        # TypeScript接口定义
+└── types/             # 类型声明文件
+```
 
-   ```bash
-   npm install
-   ```
+## 核心功能
 
-2. Start the app
+### 🏠 首页展示
+- **Banner轮播**：展示精选酒店推荐
+- **智能搜索**：快速定位目的地和日期
+- **热门推荐**：基于地理位置的酒店推荐
 
-   ```bash
-   npx expo start
-   ```
+### 🔍 酒店搜索与筛选
+- **城市选择**：支持10+主要城市选择，集成GPS定位
+- **日期选择**：直观的日历组件选择入住/退房日期
+- **价格筛选**：多价格区间快速筛选
+- **星级筛选**：1-5星级酒店分类查找
+- **标签筛选**：按设施特色（WiFi、停车场等）筛选
+- **关键词搜索**：支持酒店名称模糊搜索
 
-In the output, you'll find options to open the app in a
+### 📱 用户体验优化
+- **响应式设计**：适配不同屏幕尺寸
+- **流畅动画**：NativeWind + React Native Reanimated
+- **离线缓存**：城市选择和搜索历史自动缓存
+- **触觉反馈**：iOS Haptics增强交互体验
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 技术栈
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 核心框架
+- **React Native** v0.81.5 - 跨平台移动应用开发
+- **Expo** v54 - React Native开发工具链
+- **TypeScript** v5.9 - 类型安全的JavaScript超集
 
-## Data Management
+### UI与样式
+- **NativeWind** v4.2 - Tailwind CSS for React Native
+- **Tailwind CSS** v3.4 - 实用优先的CSS框架
+- **React Navigation** v7 - 移动端导航解决方案
 
-### 统一数据常量管理
+### 核心功能库
+- **React Native Calendars** - 日历选择组件
+- **React Native Gesture Handler** - 手势识别
+- **React Native Reanimated** - 高性能动画库
+- **Expo Location** - 地理位置服务
+- **Async Storage** - 本地数据持久化
 
-为了提高代码的可维护性和一致性，项目采用了统一的数据常量管理模式：
+## 快速开始
 
-#### 常量文件位置
-`constants/data.ts` - 集中管理所有静态数据和配置常量
+### 1. 安装依赖
 
-#### 管理的数据类型
-- **城市数据** (`CITIES`) - 支持的主要城市列表
-- **星级选项** (`STAR_OPTIONS`) - 酒店星级筛选选项
-- **价格范围** (`PRICE_OPTIONS`) - 价格区间筛选选项
-- **酒店标签** (`HOTEL_TAGS`) - 酒店特色标签
-- **默认配置** - 默认城市、日期、筛选条件等
-- **系统常量** - 缓存键名、超时时间、模态框配置等
+```bash
+cd frontend-user
+npm install
+```
 
-#### 使用示例
+### 2. 启动开发服务器
+
+```bash
+# 启动 Expo 开发服务器
+npx expo start
+
+# 或者直接在特定平台运行
+npx expo start --android  # Android 模拟器
+npx expo start --ios     # iOS 模拟器
+npx expo start --web     # Web 浏览器
+```
+
+### 3. 在设备上预览
+
+- **Expo Go App**：扫描二维码在真机上预览
+- **模拟器**：使用Android Studio或Xcode模拟器
+- **Web**：在浏览器中直接运行
+
+## API 集成
+
+### 后端接口配置
 
 ```typescript
-// 导入常量
+// services/api.ts
+export const BACKEND_CONFIG = {
+    BASE_URL: 'http://localhost:3000', // 开发环境
+    // BASE_URL: 'https://your-production-api.com', // 生产环境
+}
+```
+
+### 主要API接口
+
+- `GET /api/banners` - 获取首页Banner酒店
+- `GET /api/hotels` - 酒店列表搜索（支持分页和筛选）
+- `GET /api/hotels/:id` - 酒店详情
+- `GET /api/cities` - 城市列表
+- `GET /api/tags` - 酒店标签列表
+
+### 数据转换处理
+
+项目内置了完善的数据转换机制，自动处理：
+- 图片URL标准化
+- JSON字符串数组解析
+- 价格计算和格式化
+- 日期格式转换
+
+## 组件开发指南
+
+### 城市选择组件 (CitySelector)
+
+```typescript
+import CitySelector from '@/components/CitySelector';
+
+<CitySelector 
+  currentCity={selectedCity}
+  onCityChange={setSelectedCity}
+  showLocator={true} // 是否显示GPS定位
+/>
+```
+
+### 日期选择组件 (DateRangePicker)
+
+```typescript
+import DateRangePicker from '@/components/DateRangePicker';
+
+<DateRangePicker 
+  checkInDate={checkIn}
+  checkOutDate={checkOut}
+  onDateChange={(dates) => {
+    setCheckIn(dates.checkIn);
+    setCheckOut(dates.checkOut);
+  }}
+/>
+```
+
+### 酒店卡片组件 (HotelCard)
+
+```typescript
+import HotelCard from '@/components/HotelCard';
+
+<HotelCard 
+  hotel={hotelData}
+  onPress={() => router.push(`/hotels/${hotel.id}`)}
+/>
+```
+
+## 数据管理
+
+### 统一常量管理
+
+所有静态数据集中在 `constants/data.ts` 管理：
+
+```typescript
 import { 
   CITIES, 
   STAR_OPTIONS, 
   PRICE_OPTIONS, 
-  DEFAULT_CITY 
-} from '../constants/data';
+  HOTEL_TAGS 
+} from '@/constants/data';
 
-// 在组件中使用
-const MyComponent = () => {
-  const [city, setCity] = useState<string>(DEFAULT_CITY);
-  
-  return (
-    <FlatList
-      data={CITIES}
-      // ... 其他属性
-    />
+// 使用示例
+const CityList = () => (
+  <FlatList data={CITIES} renderItem={renderCityItem} />
+);
+```
+
+### 网络请求Hook
+
+```typescript
+import useFetch from '@/services/useFetch';
+import { fetchHotels } from '@/services/api';
+
+const HotelList = () => {
+  const { data, loading, error } = useFetch(() => 
+    fetchHotels(city, keyword, starLevel)
   );
+  
+  if (loading) return <Loading />;
+  if (error) return <Error message={error.message} />;
+  
+  return <HotelListDisplay hotels={data?.list || []} />;
 };
 ```
 
-#### 优势
-- ✨ **统一管理**: 所有静态数据集中在一个文件中
-- 🔧 **易于维护**: 修改数据只需在一个地方进行
-- 🔄 **一致性保证**: 确保整个应用使用相同的数据源
-- 📈 **扩展性强**: 添加新城市或选项非常简单
-- 🎯 **类型安全**: TypeScript 提供完整的类型检查
+## 开发规范
 
-## Components
+### TypeScript 类型安全
+- 所有组件Props必须明确定义接口
+- 网络响应数据使用预定义的TypeScript接口
+- 禁止使用隐式any类型
 
-### CitySelector 组件
+### 代码风格
+- 使用ESLint进行代码质量检查
+- 遵循React Native最佳实践
+- 组件文件使用`.tsx`扩展名
 
-这是一个可复用的城市选择组件，支持以下功能：
+### 样式规范
+- 优先使用NativeWind的Tailwind类
+- 复杂样式可以结合StyleSheet
+- 响应式设计考虑不同屏幕尺寸
 
-#### 功能特性
-- 🌍 城市列表选择（支持10个主要城市）
-- 📍 GPS定位获取当前位置
-- 💾 自动缓存最近定位结果
-- 🎨 美观的模态框界面
-- 🔧 灵活的配置选项
+## 调试与测试
 
-#### 使用方法
-
-```typescript
-import CitySelector from '../components/CitySelector';
-
-// 基础用法
-<CitySelector 
-  currentCity={selectedCity}
-  onCityChange={setSelectedCity}
-/>
-
-// 不带定位功能的用法
-<CitySelector 
-  currentCity={selectedCity}
-  onCityChange={setSelectedCity}
-  showLocator={false}
-/>
-```
-
-#### Props 说明
-
-| 属性名 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| currentCity | string | 是 | - | 当前选中的城市 |
-| onCityChange | (city: string) => void | 是 | - | 城市变更回调函数 |
-| showLocator | boolean | 否 | true | 是否显示定位按钮 |
-
-#### 使用示例
-
-详细使用示例请参考 `components/CitySelectorExample.tsx` 文件。
-
-## Get a fresh project
-
-When you're ready, run:
+### 开发调试
 
 ```bash
-npm run reset-project
+# 启动带调试信息的开发服务器
+npx expo start --dev-client
+
+# 清除缓存重新构建
+npx expo start -c
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 性能监控
+- 使用React DevTools Profiler分析组件性能
+- 监控网络请求响应时间
+- 检查内存使用情况
 
-## Learn more
+## 部署发布
 
-To learn more about developing your project with Expo, look at the following resources:
+### 构建生产版本
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+# 构建Android APK
+npx expo build:android
 
-## Join the community
+# 构建iOS IPA
+npx expo build:ios
 
-Join our community of developers creating universal apps.
+# 构建Web版本
+npx expo build:web
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### 发布到应用商店
+- 配置应用图标和启动画面
+- 设置应用元数据和截图
+- 遵循各平台发布指南
+
+## 项目特点
+
+### 🚀 高性能
+- 基于React Native原生渲染
+- 虚拟列表优化长列表性能
+- 图片懒加载和缓存机制
+
+### 🎨 现代化UI
+- Material Design设计语言
+- 流畅的动画过渡效果
+- 深色模式支持（可扩展）
+
+### 🔧 易维护
+- 模块化组件架构
+- 统一的状态管理
+- 完善的类型定义
+
+### 📱 跨平台
+- 一套代码多端运行
+- 原生性能体验
+- 平台特定优化
+
+## 学习资源
+
+- [Expo官方文档](https://docs.expo.dev/)
+- [React Native官方文档](https://reactnative.dev/)
+- [NativeWind文档](https://www.nativewind.dev/)
+- [React Navigation文档](https://reactnavigation.org/)
+
+## 社区支持
+
+- [Expo社区论坛](https://forums.expo.dev/)
+- [React Native社区](https://reactnative.dev/community)
+- 项目GitHub Issues
+
+---
+*易宿酒店预订平台移动端 - 让旅行住宿更简单*
